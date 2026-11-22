@@ -1,4 +1,4 @@
-// ABPS Frontend Engine - Pure Client Side Execution for Vercel
+// ABPS Frontend Engine - Pure Client Side Execution
 let currentUser = { username: "admin", name: "Admin Officer", role: "Administrator" };
 
 const SECTIONS = [
@@ -53,7 +53,7 @@ SECTIONS.forEach(sec => {
 
       tasks.push({
         id: taskId,
-        taskId: `${dept.src}-${sec.substring(0,3).toUpperCase()}-${String(taskId).padStart(4, '0')}`,
+        taskId: dept.src + "-" + sec.substring(0, 3).toUpperCase() + "-" + String(taskId).padStart(4, '0'),
         dept: dept.name,
         src: dept.src,
         sec: sec,
@@ -84,7 +84,7 @@ SECTIONS.forEach(sec => {
   ];
   slots.forEach(s => {
     windows.push({
-      id: `WIN-${sec.substring(0,3).toUpperCase()}-${String(winId).padStart(4, '0')}`,
+      id: "WIN-" + sec.substring(0, 3).toUpperCase() + "-" + String(winId).padStart(4, '0'),
       sec: sec,
       time: s.time,
       dur: s.dur,
@@ -104,7 +104,9 @@ let auditLogs = [
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
-  lucide.createIcons();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
   renderDashboard();
   renderTasksTable();
   renderWindowsTable();
@@ -114,18 +116,20 @@ document.addEventListener("DOMContentLoaded", () => {
 // Tab Switching
 function switchTab(tab) {
   ['dashboard', 'tasks', 'windows', 'plans', 'benchmark', 'audit'].forEach(t => {
-    const el = document.getElementById(`tab-${t}`);
-    const nav = document.getElementById(`nav-${t}`);
+    const el = document.getElementById("tab-" + t);
+    const nav = document.getElementById("nav-" + t);
     if (el) el.classList.add('hidden');
     if (nav) nav.classList.remove('sidebar-active', 'text-white');
   });
 
-  const activeEl = document.getElementById(`tab-${tab}`);
-  const activeNav = document.getElementById(`nav-${tab}`);
+  const activeEl = document.getElementById("tab-" + tab);
+  const activeNav = document.getElementById("nav-" + tab);
   if (activeEl) activeEl.classList.remove('hidden');
   if (activeNav) activeNav.classList.add('sidebar-active');
 
-  lucide.createIcons();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 }
 
 // Authentication
@@ -134,7 +138,7 @@ function handleLogin(e) {
   const u = document.getElementById('login-user').value;
   currentUser = { username: u, name: u === 'admin' ? 'Admin Officer' : (u === 'approver' ? 'Sr. DEN Officer' : 'Section Planner'), role: u };
   document.getElementById('user-display-name').innerText = currentUser.name;
-  document.getElementById('user-role-badge').innerText = `Role: ${u.toUpperCase()}`;
+  document.getElementById('user-role-badge').innerText = "Role: " + u.toUpperCase();
   document.getElementById('login-modal').classList.add('hidden');
   auditLogs.unshift({ time: new Date().toLocaleTimeString(), action: "AUTH_LOGIN", officer: currentUser.name, desc: "Officer logged into Central ABPS" });
   renderAuditTable();
@@ -144,28 +148,92 @@ function logout() {
   document.getElementById('login-modal').classList.remove('hidden');
 }
 
+// Add Task Modal Controls
+function toggleAddTaskModal(show) {
+  const modal = document.getElementById('add-task-modal');
+  if (modal) {
+    if (show) modal.classList.remove('hidden');
+    else modal.classList.add('hidden');
+  }
+}
+
+function handleManualAddTask(e) {
+  e.preventDefault();
+  const dept = document.getElementById('new-task-dept').value;
+  const sec = document.getElementById('new-task-sec').value;
+  const asset = document.getElementById('new-task-asset').value;
+  const dur = parseFloat(document.getElementById('new-task-dur').value);
+  const desc = document.getElementById('new-task-desc').value;
+  const sev = parseInt(document.getElementById('new-task-sev').value);
+  const sc = document.getElementById('new-task-sc').value === 'true';
+
+  const src = dept === 'Engineering' ? 'TMS' : (dept === 'Signal & Telecom' ? 'SMMS' : 'TDMS');
+  const bt = dept === 'Traction Distribution' ? 'Power' : 'Traffic';
+
+  const score = Math.round((0.35 * (sev / 5) + 0.30 * 0.8 + 0.20 * 0.9 + 0.15 * 0.8) * 100);
+  const finalScore = sc ? Math.max(score, 90) : score;
+
+  const newTask = {
+    id: tasks.length + 1,
+    taskId: src + "-" + sec.substring(0, 3).toUpperCase() + "-" + String(tasks.length + 1).padStart(4, '0'),
+    dept: dept,
+    src: src,
+    sec: sec,
+    asset: asset,
+    desc: desc,
+    sev: sev,
+    sc: sc,
+    dur: dur,
+    bt: bt,
+    score: finalScore,
+    status: 'Pending'
+  };
+
+  tasks.unshift(newTask);
+  document.getElementById('stat-total').innerText = tasks.length;
+  document.getElementById('stat-pending').innerText = tasks.filter(t => t.status === 'Pending').length;
+  if (sc) {
+    const curCrit = parseInt(document.getElementById('stat-critical').innerText);
+    document.getElementById('stat-critical').innerText = curCrit + 1;
+  }
+
+  auditLogs.unshift({
+    time: new Date().toLocaleTimeString(),
+    action: 'TASK_REPORTED',
+    officer: currentUser.name,
+    desc: "Manually logged " + desc + " on " + sec + " (Score: " + finalScore + ")"
+  });
+
+  toggleAddTaskModal(false);
+  renderTasksTable();
+  renderDashboard();
+  renderAuditTable();
+  switchTab('tasks');
+  alert("✅ New Defect Registered in " + src + "!\nTask ID: " + newTask.taskId + "\nCorridor: " + sec + "\nCalculated Priority Score: " + finalScore + "/100");
+}
+
 // Dashboard rendering
 function renderDashboard() {
   const topCritical = tasks.filter(t => t.sc).slice(0, 8);
   const tbody = document.getElementById('top-tasks-body');
   if (tbody) {
-    tbody.innerHTML = topCritical.map(t => `
-      <tr class="hover:bg-slate-50 transition">
-        <td class="p-3 font-mono font-bold text-blue-900">${t.taskId}</td>
-        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${getDeptClass(t.dept)}">${t.dept}</span></td>
-        <td class="p-3">${t.sec}</td>
-        <td class="p-3 font-semibold">${t.asset}</td>
-        <td class="p-3 text-slate-700">${t.desc}</td>
-        <td class="p-3 font-bold text-red-600">${t.sev}/5</td>
-        <td class="p-3 font-bold text-slate-900">${t.score}</td>
-        <td class="p-3"><span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px]">CRITICAL ⚠️</span></td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = topCritical.map(t => 
+      '<tr class="hover:bg-slate-50 transition">' +
+        '<td class="p-3 font-mono font-bold text-blue-900">' + t.taskId + '</td>' +
+        '<td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ' + getDeptClass(t.dept) + '">' + t.dept + '</span></td>' +
+        '<td class="p-3">' + t.sec + '</td>' +
+        '<td class="p-3 font-semibold">' + t.asset + '</td>' +
+        '<td class="p-3 text-slate-700">' + t.desc + '</td>' +
+        '<td class="p-3 font-bold text-red-600">' + t.sev + '/5</td>' +
+        '<td class="p-3 font-bold text-slate-900">' + t.score + '</td>' +
+        '<td class="p-3"><span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[10px]">CRITICAL ⚠️</span></td>' +
+      '</tr>'
+    ).join('');
   }
 
-  // Render Charts
+  // Render Charts safely
   const ctxPie = document.getElementById('deptPieChart');
-  if (ctxPie) {
+  if (ctxPie && window.Chart) {
     new Chart(ctxPie, {
       type: 'doughnut',
       data: {
@@ -181,7 +249,7 @@ function renderDashboard() {
   }
 
   const ctxBar = document.getElementById('priorityBarChart');
-  if (ctxBar) {
+  if (ctxBar && window.Chart) {
     new Chart(ctxBar, {
       type: 'bar',
       data: {
@@ -213,23 +281,24 @@ function renderTasksTable() {
   if (dFilter !== "All") list = list.filter(t => t.dept === dFilter);
   if (scFilter === "Critical") list = list.filter(t => t.sc);
 
-  document.getElementById('tasks-count-badge').innerText = `Showing ${list.length} tasks`;
+  const badge = document.getElementById('tasks-count-badge');
+  if (badge) badge.innerText = "Showing " + list.length + " tasks";
 
   const tbody = document.getElementById('all-tasks-body');
   if (tbody) {
-    tbody.innerHTML = list.map(t => `
-      <tr class="hover:bg-slate-50 transition">
-        <td class="p-3 font-mono font-bold text-blue-900">${t.taskId}</td>
-        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${getDeptClass(t.dept)}">${t.dept}</span></td>
-        <td class="p-3">${t.sec}</td>
-        <td class="p-3 font-semibold">${t.asset}</td>
-        <td class="p-3 text-slate-700">${t.desc}</td>
-        <td class="p-3">${t.dur} hrs</td>
-        <td class="p-3">${t.bt}</td>
-        <td class="p-3 font-bold ${t.score >= 80 ? 'text-red-600' : 'text-slate-800'}">${t.score}</td>
-        <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.status === 'Scheduled' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${t.status}</span></td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = list.map(t => 
+      '<tr class="hover:bg-slate-50 transition">' +
+        '<td class="p-3 font-mono font-bold text-blue-900">' + t.taskId + '</td>' +
+        '<td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ' + getDeptClass(t.dept) + '">' + t.dept + '</span></td>' +
+        '<td class="p-3">' + t.sec + '</td>' +
+        '<td class="p-3 font-semibold">' + t.asset + '</td>' +
+        '<td class="p-3 text-slate-700">' + t.desc + '</td>' +
+        '<td class="p-3">' + t.dur + ' hrs</td>' +
+        '<td class="p-3">' + t.bt + '</td>' +
+        '<td class="p-3 font-bold ' + (t.score >= 80 ? 'text-red-600' : 'text-slate-800') + '">' + t.score + '</td>' +
+        '<td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ' + (t.status === 'Scheduled' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800') + '">' + t.status + '</span></td>' +
+      '</tr>'
+    ).join('');
   }
 }
 
@@ -237,26 +306,25 @@ function renderTasksTable() {
 function renderWindowsTable() {
   const tbody = document.getElementById('windows-body');
   if (tbody) {
-    tbody.innerHTML = windows.slice(0, 50).map(w => `
-      <tr class="hover:bg-slate-50 transition">
-        <td class="p-3 font-mono font-bold text-slate-900">${w.id}</td>
-        <td class="p-3 font-semibold">${w.sec}</td>
-        <td class="p-3 text-slate-700">${w.time}</td>
-        <td class="p-3 font-bold">${w.dur} hrs</td>
-        <td class="p-3 text-emerald-600 font-bold">Granted</td>
-        <td class="p-3 text-emerald-600 font-bold">Granted</td>
-        <td class="p-3"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">AVAILABLE</span></td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = windows.slice(0, 50).map(w => 
+      '<tr class="hover:bg-slate-50 transition">' +
+        '<td class="p-3 font-mono font-bold text-slate-900">' + w.id + '</td>' +
+        '<td class="p-3 font-semibold">' + w.sec + '</td>' +
+        '<td class="p-3 text-slate-700">' + w.time + '</td>' +
+        '<td class="p-3 font-bold">' + w.dur + ' hrs</td>' +
+        '<td class="p-3 text-emerald-600 font-bold">Granted</td>' +
+        '<td class="p-3 text-emerald-600 font-bold">Granted</td>' +
+        '<td class="p-3"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">AVAILABLE</span></td>' +
+      '</tr>'
+    ).join('');
   }
 }
 
 // Optimizer Execution
 function runOptimizer() {
   const horizon = document.getElementById('opt-horizon').value;
-  const planId = `PLAN-${horizon.substring(0,1)}-${Date.now().toString().slice(-6)}`;
+  const planId = "PLAN-" + horizon.substring(0, 1) + "-" + Date.now().toString().slice(-6);
 
-  // Mark 175 tasks as scheduled
   let schedCount = 0;
   let jointCount = 24;
   tasks.forEach((t, i) => {
@@ -280,19 +348,19 @@ function runOptimizer() {
   document.getElementById('stat-scheduled').innerText = schedCount;
   document.getElementById('stat-pending').innerText = tasks.length - schedCount;
   document.getElementById('stat-joint').innerText = jointCount;
-  document.getElementById('stat-delay').innerHTML = `${newPlan.delays} <span class="text-xs font-normal">min</span>`;
+  document.getElementById('stat-delay').innerHTML = newPlan.delays + ' <span class="text-xs font-normal">min</span>';
 
   auditLogs.unshift({
     time: new Date().toLocaleTimeString(),
     action: "PLAN_GENERATED",
     officer: currentUser.name,
-    desc: `Generated ${horizon} Plan ${planId} with ${jointCount} Joint Blocks`
+    desc: "Generated " + horizon + " Plan " + planId + " with " + jointCount + " Joint Blocks"
   });
 
   renderPlans();
   renderTasksTable();
   renderAuditTable();
-  alert(`✅ Optimized Plan Generated Successfully!\nPlan ID: ${planId}\nTasks Scheduled: ${schedCount}\nJoint Blocks Formed: ${jointCount}`);
+  alert("✅ Optimized Plan Generated Successfully!\nPlan ID: " + planId + "\nTasks Scheduled: " + schedCount + "\nJoint Blocks Formed: " + jointCount);
 }
 
 function renderPlans() {
@@ -300,52 +368,48 @@ function renderPlans() {
   if (!container) return;
 
   if (plans.length === 0) {
-    container.innerHTML = `<div class="bg-white p-6 rounded-xl border border-slate-200 text-center text-xs text-slate-500">No plans generated yet. Click 'Run Optimizer' above!</div>`;
+    container.innerHTML = '<div class="bg-white p-6 rounded-xl border border-slate-200 text-center text-xs text-slate-500">No plans generated yet. Click \'Run Optimizer\' above!</div>';
     return;
   }
 
-  container.innerHTML = plans.map(p => `
-    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-      <div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3">
-        <div>
-          <span class="text-xs font-bold font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">${p.id}</span>
-          <span class="text-xs text-slate-500 ml-2">(${p.horizon}) - Created at ${p.created}</span>
-        </div>
-        <span class="text-xs font-bold px-2 py-0.5 rounded ${p.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : (p.status === 'Published' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')}">
-          ${p.status}
-        </span>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">TASKS SCHEDULED</div><div class="text-lg font-black text-slate-800">${p.scheduled}</div></div>
-        <div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">JOINT BLOCKS SAVED</div><div class="text-lg font-black text-purple-600">${p.joint}</div></div>
-        <div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">TRAIN DELAY IMPACT</div><div class="text-lg font-black text-slate-800">${p.delays} min</div></div>
-        <div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">LINE AVAILABILITY</div><div class="text-lg font-black text-emerald-600">98.4%</div></div>
-      </div>
-
-      <!-- Gantt Demo Box -->
-      <div class="p-3 bg-slate-900 rounded-lg text-white text-xs">
-        <div class="font-bold text-[11px] text-slate-300 mb-2">TIMELINE GANTT (MULTI-DEPARTMENT SYNCHRONIZATION):</div>
-        <div class="space-y-1.5 font-mono text-[10px]">
-          <div class="flex items-center gap-2"><span class="w-16 text-slate-400">00:00-04:00</span> <div class="bg-sky-600 text-white px-2 py-0.5 rounded flex-1">Engg: Rail Fracture Replacement [SEC-01]</div></div>
-          <div class="flex items-center gap-2"><span class="w-16 text-slate-400">00:00-04:00</span> <div class="bg-purple-600 text-white px-2 py-0.5 rounded flex-1">🔗 JOINT BLOCK: TRD OHE Maintenance + S&T Cable Inspection</div></div>
-          <div class="flex items-center gap-2"><span class="w-16 text-slate-400">10:30-12:00</span> <div class="bg-emerald-600 text-white px-2 py-0.5 rounded flex-1">S&T: Home Signal Relay Interlocking Calibration</div></div>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-        ${p.status === 'Draft' ? `<button onclick="approvePlan('${p.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded text-xs font-bold transition">✅ Sanction & Approve Plan</button>` : ''}
-        ${p.status === 'Approved' ? `<button onclick="publishPlan('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-xs font-bold transition">📢 Publish to Train Controllers</button>` : ''}
-      </div>
-    </div>
-  `).join('');
+  container.innerHTML = plans.map(p => 
+    '<div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">' +
+      '<div class="flex flex-wrap justify-between items-center border-b border-slate-100 pb-3">' +
+        '<div>' +
+          '<span class="text-xs font-bold font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">' + p.id + '</span>' +
+          '<span class="text-xs text-slate-500 ml-2">(' + p.horizon + ') - Created at ' + p.created + '</span>' +
+        '</div>' +
+        '<span class="text-xs font-bold px-2 py-0.5 rounded ' + (p.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : (p.status === 'Published' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')) + '">' +
+          p.status +
+        '</span>' +
+      '</div>' +
+      '<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">' +
+        '<div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">TASKS SCHEDULED</div><div class="text-lg font-black text-slate-800">' + p.scheduled + '</div></div>' +
+        '<div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">JOINT BLOCKS SAVED</div><div class="text-lg font-black text-purple-600">' + p.joint + '</div></div>' +
+        '<div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">TRAIN DELAY IMPACT</div><div class="text-lg font-black text-slate-800">' + p.delays + ' min</div></div>' +
+        '<div class="bg-slate-50 p-3 rounded-lg"><div class="text-[10px] text-slate-500 font-bold">LINE AVAILABILITY</div><div class="text-lg font-black text-emerald-600">98.4%</div></div>' +
+      '</div>' +
+      '<div class="p-3 bg-slate-900 rounded-lg text-white text-xs">' +
+        '<div class="font-bold text-[11px] text-slate-300 mb-2">TIMELINE GANTT (MULTI-DEPARTMENT SYNCHRONIZATION):</div>' +
+        '<div class="space-y-1.5 font-mono text-[10px]">' +
+          '<div class="flex items-center gap-2"><span class="w-16 text-slate-400">00:00-04:00</span> <div class="bg-sky-600 text-white px-2 py-0.5 rounded flex-1">Engg: Rail Fracture Replacement [SEC-01]</div></div>' +
+          '<div class="flex items-center gap-2"><span class="w-16 text-slate-400">00:00-04:00</span> <div class="bg-purple-600 text-white px-2 py-0.5 rounded flex-1">🔗 JOINT BLOCK: TRD OHE Maintenance + S&T Cable Inspection</div></div>' +
+          '<div class="flex items-center gap-2"><span class="w-16 text-slate-400">10:30-12:00</span> <div class="bg-emerald-600 text-white px-2 py-0.5 rounded flex-1">S&T: Home Signal Relay Interlocking Calibration</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex justify-end gap-2 pt-2 border-t border-slate-100">' +
+        (p.status === 'Draft' ? '<button onclick="approvePlan(\'' + p.id + '\')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded text-xs font-bold transition">✅ Sanction & Approve Plan</button>' : '') +
+        (p.status === 'Approved' ? '<button onclick="publishPlan(\'' + p.id + '\')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-xs font-bold transition">📢 Publish to Train Controllers</button>' : '') +
+      '</div>' +
+    '</div>'
+  ).join('');
 }
 
 function approvePlan(id) {
   const p = plans.find(x => x.id === id);
   if (p) {
     p.status = "Approved";
-    auditLogs.unshift({ time: new Date().toLocaleTimeString(), action: "PLAN_APPROVED", officer: currentUser.name, desc: `Plan ${id} officially sanctioned by Approver` });
+    auditLogs.unshift({ time: new Date().toLocaleTimeString(), action: "PLAN_APPROVED", officer: currentUser.name, desc: "Plan " + id + " officially sanctioned by Approver" });
     renderPlans();
     renderAuditTable();
   }
@@ -355,7 +419,7 @@ function publishPlan(id) {
   const p = plans.find(x => x.id === id);
   if (p) {
     p.status = "Published";
-    auditLogs.unshift({ time: new Date().toLocaleTimeString(), action: "PLAN_PUBLISHED", officer: currentUser.name, desc: `Plan ${id} transmitted to COA & Section Controllers` });
+    auditLogs.unshift({ time: new Date().toLocaleTimeString(), action: "PLAN_PUBLISHED", officer: currentUser.name, desc: "Plan " + id + " transmitted to COA & Section Controllers" });
     renderPlans();
     renderAuditTable();
   }
@@ -368,80 +432,13 @@ function runBenchmarkSim() {
 function renderAuditTable() {
   const tbody = document.getElementById('audit-body');
   if (tbody) {
-    tbody.innerHTML = auditLogs.map(a => `
-      <tr class="hover:bg-slate-50 transition">
-        <td class="p-3 font-mono text-slate-500">${a.time}</td>
-        <td class="p-3 font-bold font-mono text-blue-900">${a.action}</td>
-        <td class="p-3 font-semibold">${a.officer}</td>
-        <td class="p-3 text-slate-700">${a.desc}</td>
-      </tr>
-    `).join('');
+    tbody.innerHTML = auditLogs.map(a => 
+      '<tr class="hover:bg-slate-50 transition">' +
+        '<td class="p-3 font-mono text-slate-500">' + a.time + '</td>' +
+        '<td class="p-3 font-bold font-mono text-blue-900">' + a.action + '</td>' +
+        '<td class="p-3 font-semibold">' + a.officer + '</td>' +
+        '<td class="p-3 text-slate-700">' + a.desc + '</td>' +
+      '</tr>'
+    ).join('');
   }
-}
-
-// Add Task Modal Controls
-function toggleAddTaskModal(show) {
-  const modal = document.getElementById('add-task-modal');
-  if (modal) {
-    if (show) modal.classList.remove('hidden');
-    else modal.classList.add('hidden');
-  }
-}
-
-function handleManualAddTask(e) {
-  e.preventDefault();
-  const dept = document.getElementById('new-task-dept').value;
-  const sec = document.getElementById('new-task-sec').value;
-  const asset = document.getElementById('new-task-asset').value;
-  const dur = parseFloat(document.getElementById('new-task-dur').value);
-  const desc = document.getElementById('new-task-desc').value;
-  const sev = parseInt(document.getElementById('new-task-sev').value);
-  const sc = document.getElementById('new-task-sc').value === 'true';
-
-  const src = dept === 'Engineering' ? 'TMS' : (dept === 'Signal & Telecom' ? 'SMMS' : 'TDMS');
-  const bt = dept === 'Traction Distribution' ? 'Power' : 'Traffic';
-
-  const score = Math.round((0.35 * (sev / 5) + 0.30 * 0.8 + 0.20 * 0.9 + 0.15 * 0.8) * 100);
-  const finalScore = sc ? Math.max(score, 90) : score;
-
-  const newTask = {
-    id: tasks.length + 1,
-    taskId: ${src}--,
-    dept: dept,
-    src: src,
-    sec: sec,
-    asset: asset,
-    desc: desc,
-    sev: sev,
-    sc: sc,
-    dur: dur,
-    bt: bt,
-    score: finalScore,
-    status: 'Pending'
-  };
-
-  tasks.unshift(newTask);
-  document.getElementById('stat-total').innerText = tasks.length;
-  document.getElementById('stat-pending').innerText = tasks.filter(t => t.status === 'Pending').length;
-  if (sc) {
-    const curCrit = parseInt(document.getElementById('stat-critical').innerText);
-    document.getElementById('stat-critical').innerText = curCrit + 1;
-  }
-
-  auditLogs.unshift({
-    time: new Date().toLocaleTimeString(),
-    action: 'TASK_REPORTED',
-    officer: currentUser.name,
-    desc: Manually logged  on  (Score: )
-  });
-
-  toggleAddTaskModal(false);
-  renderTasksTable();
-  renderDashboard();
-  renderAuditTable();
-  switchTab('tasks');
-  alert(✅ New Defect Registered in !
-Task ID: 
-Corridor: 
-Calculated Priority Score: /100);
 }
