@@ -378,3 +378,70 @@ function renderAuditTable() {
     `).join('');
   }
 }
+
+// Add Task Modal Controls
+function toggleAddTaskModal(show) {
+  const modal = document.getElementById('add-task-modal');
+  if (modal) {
+    if (show) modal.classList.remove('hidden');
+    else modal.classList.add('hidden');
+  }
+}
+
+function handleManualAddTask(e) {
+  e.preventDefault();
+  const dept = document.getElementById('new-task-dept').value;
+  const sec = document.getElementById('new-task-sec').value;
+  const asset = document.getElementById('new-task-asset').value;
+  const dur = parseFloat(document.getElementById('new-task-dur').value);
+  const desc = document.getElementById('new-task-desc').value;
+  const sev = parseInt(document.getElementById('new-task-sev').value);
+  const sc = document.getElementById('new-task-sc').value === 'true';
+
+  const src = dept === 'Engineering' ? 'TMS' : (dept === 'Signal & Telecom' ? 'SMMS' : 'TDMS');
+  const bt = dept === 'Traction Distribution' ? 'Power' : 'Traffic';
+
+  const score = Math.round((0.35 * (sev / 5) + 0.30 * 0.8 + 0.20 * 0.9 + 0.15 * 0.8) * 100);
+  const finalScore = sc ? Math.max(score, 90) : score;
+
+  const newTask = {
+    id: tasks.length + 1,
+    taskId: ${src}--,
+    dept: dept,
+    src: src,
+    sec: sec,
+    asset: asset,
+    desc: desc,
+    sev: sev,
+    sc: sc,
+    dur: dur,
+    bt: bt,
+    score: finalScore,
+    status: 'Pending'
+  };
+
+  tasks.unshift(newTask);
+  document.getElementById('stat-total').innerText = tasks.length;
+  document.getElementById('stat-pending').innerText = tasks.filter(t => t.status === 'Pending').length;
+  if (sc) {
+    const curCrit = parseInt(document.getElementById('stat-critical').innerText);
+    document.getElementById('stat-critical').innerText = curCrit + 1;
+  }
+
+  auditLogs.unshift({
+    time: new Date().toLocaleTimeString(),
+    action: 'TASK_REPORTED',
+    officer: currentUser.name,
+    desc: Manually logged  on  (Score: )
+  });
+
+  toggleAddTaskModal(false);
+  renderTasksTable();
+  renderDashboard();
+  renderAuditTable();
+  switchTab('tasks');
+  alert(✅ New Defect Registered in !
+Task ID: 
+Corridor: 
+Calculated Priority Score: /100);
+}

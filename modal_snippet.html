@@ -1,0 +1,82 @@
+<!-- Add Task Modal -->
+  <div id="add-task-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border-t-8 border-sky-600">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+            <span>🛠️</span> Report New Maintenance Defect / Request Block
+          </h3>
+          <button onclick="toggleAddTaskModal(false)" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Log a defect manually to see the AI automatically calculate its Priority Score and slot it into a train gap.</p>
+
+        <form id="add-task-form" onsubmit="handleManualAddTask(event)" class="space-y-3 text-left">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Department</label>
+              <select id="new-task-dept" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+                <option value="Engineering">Engineering (Track - TMS)</option>
+                <option value="Signal & Telecom">Signal & Telecom (SMMS)</option>
+                <option value="Traction Distribution">Traction Distribution (TRD - TDMS)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Corridor / Section</label>
+              <select id="new-task-sec" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+                <option value="Mumbai-Pune">Mumbai-Pune</option>
+                <option value="Delhi-Agra">Delhi-Agra</option>
+                <option value="Chennai-Bangalore">Chennai-Bangalore</option>
+                <option value="Kolkata-Durgapur">Kolkata-Durgapur</option>
+                <option value="Ahmedabad-Vadodara">Ahmedabad-Vadodara</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Asset Type</label>
+              <input type="text" id="new-task-asset" value="Track / Rail" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Duration Needed</label>
+              <select id="new-task-dur" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+                <option value="2.0">2.0 Hours</option>
+                <option value="3.0">3.0 Hours</option>
+                <option value="4.0">4.0 Hours</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Defect Description</label>
+            <input type="text" id="new-task-desc" placeholder="e.g. Major crack on switch rail KM 142" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Severity (1 to 5)</label>
+              <select id="new-task-sev" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-bold text-red-600">
+                <option value="5">5 - Critical (Track risk)</option>
+                <option value="4">4 - High</option>
+                <option value="3">3 - Medium</option>
+                <option value="2">2 - Low</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Safety Critical?</label>
+              <select id="new-task-sc" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-bold text-red-600">
+                <option value="true">YES ⚠️ (Must Schedule)</option>
+                <option value="false">NO (Routine)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-3">
+            <button type="submit" class="w-full bg-sky-700 hover:bg-sky-800 text-white py-2 rounded-lg font-bold text-xs shadow transition">
+              ➕ Submit Defect to Central System
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>

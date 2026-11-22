@@ -20,8 +20,91 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col md:flex-row">
 
+  <!-- ==================== ADD TASK MODAL ==================== -->
+  <div id="add-task-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border-t-8 border-sky-600">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span>🛠️</span> Report New Track Defect / Request Block
+          </h3>
+          <button onclick="toggleAddTaskModal(false)" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Type the maintenance need here. The AI will score its urgency and slot it into a train timetable gap!</p>
+
+        <form id="add-task-form" onsubmit="handleManualAddTask(event)" class="space-y-3 text-left">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Department</label>
+              <select id="new-task-dept" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+                <option value="Engineering">Engineering (Track - TMS)</option>
+                <option value="Signal & Telecom">Signal & Telecom (SMMS)</option>
+                <option value="Traction Distribution">Traction Distribution (TRD - TDMS)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Corridor / Section</label>
+              <select id="new-task-sec" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+                <option value="Mumbai-Pune">Mumbai-Pune</option>
+                <option value="Delhi-Agra">Delhi-Agra</option>
+                <option value="Chennai-Bangalore">Chennai-Bangalore</option>
+                <option value="Kolkata-Durgapur">Kolkata-Durgapur</option>
+                <option value="Ahmedabad-Vadodara">Ahmedabad-Vadodara</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Asset Involved</label>
+              <input type="text" id="new-task-asset" value="Track Rail" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Block Duration Needed</label>
+              <select id="new-task-dur" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+                <option value="2.0">2.0 Hours</option>
+                <option value="3.0">3.0 Hours</option>
+                <option value="4.0">4.0 Hours</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Defect Description (What needs work?)</label>
+            <input type="text" id="new-task-desc" placeholder="e.g. Major crack on switch rail KM 142" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Severity (1 to 5)</label>
+              <select id="new-task-sev" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-bold text-red-600">
+                <option value="5">5 - Critical (Derailment risk)</option>
+                <option value="4">4 - High urgency</option>
+                <option value="3">3 - Medium</option>
+                <option value="2">2 - Routine maintenance</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Safety Critical?</label>
+              <select id="new-task-sc" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg font-bold text-red-600">
+                <option value="true">YES ⚠️ (Must Schedule Immediately)</option>
+                <option value="false">NO (Can Defer)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-3">
+            <button type="submit" class="w-full bg-sky-700 hover:bg-sky-800 text-white py-2.5 rounded-lg font-bold text-xs shadow transition">
+              ➕ Submit Defect to Central System
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== LOGIN MODAL ==================== -->
-  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-t-8 border-red-600">
       <div class="p-8 text-center">
         <div class="text-5xl mb-3">🚆</div>
@@ -105,15 +188,26 @@
 
     <!-- Top Railway Banner -->
     <div class="navy-gradient text-white rounded-2xl p-6 shadow-xl mb-6 relative overflow-hidden border-b-4 border-[#f4a261]">
-      <span class="inline-block bg-[#f4a261] text-[#0b2545] text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider mb-2">
-        MINISTRY OF RAILWAYS • FIXED INFRASTRUCTURE MANAGEMENT
-      </span>
-      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-3">
-        <span>🚆</span> Automatic Block Planning System (ABPS)
-      </h1>
-      <p class="text-sky-200 text-sm mt-1 max-w-3xl">
-        AI-driven multi-department scheduling integrating Track (TMS), Signalling (SMMS), Traction (TDMS), and Timetables (COA).
-      </p>
+      <div class="flex flex-wrap justify-between items-start gap-4">
+        <div>
+          <span class="inline-block bg-[#f4a261] text-[#0b2545] text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider mb-2">
+            MINISTRY OF RAILWAYS • FIXED INFRASTRUCTURE MANAGEMENT
+          </span>
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-3">
+            <span>🚆</span> Automatic Block Planning System (ABPS)
+          </h1>
+          <p class="text-sky-200 text-sm mt-1 max-w-3xl">
+            AI-driven multi-department scheduling integrating Track (TMS), Signalling (SMMS), Traction (TDMS), and Timetables (COA).
+          </p>
+        </div>
+
+        <!-- Action Button on Top Banner -->
+        <div>
+          <button onclick="toggleAddTaskModal(true)" class="bg-[#f4a261] hover:bg-amber-400 text-[#0b2545] px-4 py-2 rounded-xl font-black text-xs shadow-lg transition flex items-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Report New Defect
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- ==================== TAB 1: DASHBOARD ==================== -->
@@ -163,6 +257,17 @@
           <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Active Corridors <i data-lucide="map-pin" class="w-4 h-4 text-teal-600"></i></div>
           <div class="text-2xl font-black text-teal-600 mt-2">15</div>
           <div class="text-[11px] text-slate-400 mt-0.5">CR, WR, NR, SR, ER</div>
+        </div>
+      </div>
+
+      <!-- Quick Guidance Callout for User -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+        <span class="text-2xl">💡</span>
+        <div class="text-xs text-amber-900 leading-relaxed">
+          <b>What to do on this site:</b> You are logged in as the <b>Central Railway Maintenance Controller</b>. 
+          All 3 railway departments (Track, Signals, Overhead Wires) have sent <b>201 pending defects</b>. 
+          Right now, <b>Scheduled Blocks = 0</b>. 
+          Go to <button onclick="switchTab('plans')" class="font-bold underline text-indigo-700">Block Plans (AI)</button> in the sidebar and click <b>"Run Optimizer"</b> to let the AI automatically schedule everything into train gaps!
         </div>
       </div>
 
@@ -231,7 +336,12 @@
             <option value="Critical">Safety Critical Only ⚠️</option>
           </select>
         </div>
-        <div class="text-xs text-slate-500 font-medium" id="tasks-count-badge">Showing 201 tasks</div>
+        <div class="flex items-center gap-3">
+          <div class="text-xs text-slate-500 font-medium" id="tasks-count-badge">Showing 201 tasks</div>
+          <button onclick="toggleAddTaskModal(true)" class="bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add New Task
+          </button>
+        </div>
       </div>
 
       <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -330,7 +440,7 @@
             <option value="Weekly">Weekly Horizon (7 Days)</option>
             <option value="Monthly">Monthly Horizon (30 Days)</option>
           </select>
-          <button onclick="runOptimizer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+          <button onclick="runOptimizer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
             <i data-lucide="play" class="w-4 h-4"></i> Run Optimizer & Generate Plan
           </button>
         </div>
