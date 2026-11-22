@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ABPS | Indian Railways AI Automatic Block Planning System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .navy-gradient { background: linear-gradient(135deg, #0b2545 0%, #133c55 50%, #134074 100%); }
+    .sidebar-active { background-color: rgba(244, 162, 97, 0.15); border-left: 4px solid #f4a261; color: #ffffff !important; font-weight: 600; }
+  </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col md:flex-row">
+
+  <!-- ==================== LOGIN MODAL ==================== -->
+  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border-t-8 border-red-600">
+      <div class="p-8 text-center">
+        <div class="text-5xl mb-3">🚆</div>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight">ABPS Rail Portal</h2>
+        <p class="text-xs font-bold text-red-600 uppercase tracking-widest mt-1">Ministry of Railways • GoI</p>
+        <p class="text-xs text-slate-500 mt-2">Automatic Block Planning & Multi-Department Maintenance Scheduler</p>
+
+        <form id="login-form" class="mt-6 text-left space-y-4" onsubmit="handleLogin(event)">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Railway Officer ID</label>
+            <input type="text" id="login-user" value="admin" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none text-sm font-medium">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Security Password</label>
+            <input type="password" id="login-pass" value="admin123" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:outline-none text-sm font-medium">
+          </div>
+          <button type="submit" class="w-full bg-[#134074] hover:bg-[#0b2545] text-white py-2.5 rounded-lg font-bold text-sm shadow-md transition duration-150">
+            Secure Sign In
+          </button>
+        </form>
+
+        <div class="mt-6 bg-slate-50 p-3 rounded-lg border border-slate-200 text-left text-xs text-slate-600 space-y-1">
+          <div class="font-bold text-slate-800">📋 Default Evaluation Credentials:</div>
+          <div><span class="font-bold text-slate-700">Admin:</span> <code class="bg-slate-200 px-1 py-0.5 rounded">admin</code> / <code class="bg-slate-200 px-1 py-0.5 rounded">admin123</code></div>
+          <div><span class="font-bold text-slate-700">Planner:</span> <code class="bg-slate-200 px-1 py-0.5 rounded">planner1</code> / <code class="bg-slate-200 px-1 py-0.5 rounded">plan123</code></div>
+          <div><span class="font-bold text-slate-700">Approver:</span> <code class="bg-slate-200 px-1 py-0.5 rounded">approver</code> / <code class="bg-slate-200 px-1 py-0.5 rounded">approve123</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="w-full md:w-64 bg-[#0b1f3a] text-slate-300 flex-shrink-0 flex flex-col justify-between hidden md:flex min-h-screen">
+    <div>
+      <div class="p-6 text-center border-b border-slate-800">
+        <div class="text-3xl mb-1">🇮🇳 🚆</div>
+        <div class="font-extrabold text-lg text-[#f4a261] tracking-wider">ABPS RAIL-NET</div>
+        <div class="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">Indian Railways Central AI</div>
+      </div>
+
+      <!-- Officer Badge -->
+      <div class="m-4 p-3 bg-slate-800/60 rounded-xl border-l-4 border-[#f4a261]">
+        <div class="text-[10px] text-slate-400 font-bold uppercase">Officer Logged In:</div>
+        <div id="user-display-name" class="font-bold text-white text-sm">Admin Officer</div>
+        <div id="user-role-badge" class="text-xs text-sky-400 font-medium">Role: Administrator</div>
+      </div>
+
+      <!-- Nav Links -->
+      <nav class="mt-4 px-3 space-y-1 text-sm font-medium">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 sidebar-active hover:bg-slate-800/50 transition">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-[#f4a261]"></i> Executive Dashboard
+        </button>
+        <button onclick="switchTab('tasks')" id="nav-tasks" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-slate-300 hover:bg-slate-800/50 transition">
+          <i data-lucide="wrench" class="w-4 h-4 text-sky-400"></i> Maintenance Tasks
+        </button>
+        <button onclick="switchTab('windows')" id="nav-windows" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-slate-300 hover:bg-slate-800/50 transition">
+          <i data-lucide="clock" class="w-4 h-4 text-teal-400"></i> Corridor Windows
+        </button>
+        <button onclick="switchTab('plans')" id="nav-plans" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-slate-300 hover:bg-slate-800/50 transition">
+          <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-400"></i> Block Plans (AI)
+        </button>
+        <button onclick="switchTab('benchmark')" id="nav-benchmark" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-slate-300 hover:bg-slate-800/50 transition">
+          <i data-lucide="trending-up" class="w-4 h-4 text-amber-400"></i> AI Benchmark
+        </button>
+        <button onclick="switchTab('audit')" id="nav-audit" class="w-full text-left px-3 py-2.5 rounded-lg flex items-center gap-3 text-slate-300 hover:bg-slate-800/50 transition">
+          <i data-lucide="scroll-text" class="w-4 h-4 text-purple-400"></i> Audit Trail
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sign out -->
+    <div class="p-4 border-t border-slate-800">
+      <button onclick="logout()" class="w-full py-2 bg-slate-800 hover:bg-red-900/40 text-slate-300 hover:text-red-400 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2">
+        <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full overflow-y-auto">
+
+    <!-- Top Railway Banner -->
+    <div class="navy-gradient text-white rounded-2xl p-6 shadow-xl mb-6 relative overflow-hidden border-b-4 border-[#f4a261]">
+      <span class="inline-block bg-[#f4a261] text-[#0b2545] text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider mb-2">
+        MINISTRY OF RAILWAYS • FIXED INFRASTRUCTURE MANAGEMENT
+      </span>
+      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-3">
+        <span>🚆</span> Automatic Block Planning System (ABPS)
+      </h1>
+      <p class="text-sky-200 text-sm mt-1 max-w-3xl">
+        AI-driven multi-department scheduling integrating Track (TMS), Signalling (SMMS), Traction (TDMS), and Timetables (COA).
+      </p>
+    </div>
+
+    <!-- ==================== TAB 1: DASHBOARD ==================== -->
+    <section id="tab-dashboard" class="space-y-6">
+      <!-- KPI Cards Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-sky-600">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Total Tasks <i data-lucide="list-todo" class="w-4 h-4 text-sky-600"></i></div>
+          <div id="stat-total" class="text-2xl font-black text-slate-900 mt-2">201</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">From TMS, SMMS, TDMS</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-amber-500">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Pending Allocation <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i></div>
+          <div id="stat-pending" class="text-2xl font-black text-amber-600 mt-2">201</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Awaiting schedule window</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-emerald-600">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Scheduled Blocks <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i></div>
+          <div id="stat-scheduled" class="text-2xl font-black text-emerald-600 mt-2">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Assigned to train gaps</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-red-600">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Safety Critical <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i></div>
+          <div id="stat-critical" class="text-2xl font-black text-red-600 mt-2">69</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Must-schedule priority</div>
+        </div>
+      </div>
+
+      <!-- Second Metric Row -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-purple-600">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Joint Blocks Saved <i data-lucide="sparkles" class="w-4 h-4 text-purple-600"></i></div>
+          <div id="stat-joint" class="text-2xl font-black text-purple-600 mt-2">0</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Multi-dept co-utilization</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-slate-600">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Train Delay Mins <i data-lucide="train" class="w-4 h-4 text-slate-600"></i></div>
+          <div id="stat-delay" class="text-2xl font-black text-slate-800 mt-2">0 <span class="text-xs font-normal">min</span></div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Corridor traffic impact</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-blue-600">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Asset Uptime <i data-lucide="activity" class="w-4 h-4 text-blue-600"></i></div>
+          <div id="stat-uptime" class="text-2xl font-black text-blue-600 mt-2">98.4%</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">Fixed line availability</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-teal-600">
+          <div class="text-[11px] font-bold text-slate-500 uppercase flex justify-between">Active Corridors <i data-lucide="map-pin" class="w-4 h-4 text-teal-600"></i></div>
+          <div class="text-2xl font-black text-teal-600 mt-2">15</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">CR, WR, NR, SR, ER</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i> Maintenance Tasks by Department
+          </h3>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="deptPieChart"></canvas>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-4 h-4 text-sky-600"></i> Priority Score Distribution (0-100)
+          </h3>
+          <div class="h-64 flex items-center justify-center">
+            <canvas id="priorityBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Critical Defects Table -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-red-600"></i> High-Priority & Safety-Critical Defects
+          </h3>
+          <span class="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded">Action Required</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-100 text-slate-600 uppercase font-bold text-[10px]">
+              <tr>
+                <th class="p-3">Task ID</th>
+                <th class="p-3">Dept</th>
+                <th class="p-3">Corridor</th>
+                <th class="p-3">Asset</th>
+                <th class="p-3">Defect Description</th>
+                <th class="p-3">Severity</th>
+                <th class="p-3">AI Score</th>
+                <th class="p-3">Safety Critical</th>
+              </tr>
+            </thead>
+            <tbody id="top-tasks-body" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: TASKS ==================== -->
+    <section id="tab-tasks" class="space-y-6 hidden">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+        <div class="flex flex-wrap gap-3 items-center">
+          <select id="filter-dept" onchange="renderTasksTable()" class="px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+            <option value="All">All Departments</option>
+            <option value="Engineering">Engineering (TMS)</option>
+            <option value="Signal & Telecom">Signal & Telecom (SMMS)</option>
+            <option value="Traction Distribution">Traction Distribution (TDMS)</option>
+          </select>
+          <select id="filter-sc" onchange="renderTasksTable()" class="px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+            <option value="All">All Severity</option>
+            <option value="Critical">Safety Critical Only ⚠️</option>
+          </select>
+        </div>
+        <div class="text-xs text-slate-500 font-medium" id="tasks-count-badge">Showing 201 tasks</div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto max-h-[500px]">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-100 text-slate-600 uppercase font-bold text-[10px] sticky top-0">
+              <tr>
+                <th class="p-3">Task ID</th>
+                <th class="p-3">Dept</th>
+                <th class="p-3">Corridor</th>
+                <th class="p-3">Asset</th>
+                <th class="p-3">Defect</th>
+                <th class="p-3">Duration</th>
+                <th class="p-3">Block Type</th>
+                <th class="p-3">Score</th>
+                <th class="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody id="all-tasks-body" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AI Explainability Box -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+        <h3 class="text-sm font-bold text-blue-900 flex items-center gap-2 mb-2">
+          <i data-lucide="help-circle" class="w-4 h-4 text-blue-600"></i> AI Explainability: Priority Score Formula
+        </h3>
+        <p class="text-xs text-blue-800 leading-relaxed mb-3">
+          Score is calculated based on the official SRS formula:
+          <code class="bg-blue-100 px-2 py-0.5 rounded font-mono font-bold">Score = 0.35*Severity + 0.30*Urgency + 0.20*AssetCriticality + 0.15*TrafficDensity</code>
+        </p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div class="bg-white p-3 rounded-lg border border-blue-100">
+            <span class="text-slate-500 block">Severity (1-5)</span>
+            <span class="font-bold text-blue-900">35% Weight</span>
+          </div>
+          <div class="bg-white p-3 rounded-lg border border-blue-100">
+            <span class="text-slate-500 block">Overdue Days</span>
+            <span class="font-bold text-blue-900">30% Weight</span>
+          </div>
+          <div class="bg-white p-3 rounded-lg border border-blue-100">
+            <span class="text-slate-500 block">Asset Criticality</span>
+            <span class="font-bold text-blue-900">20% Weight</span>
+          </div>
+          <div class="bg-white p-3 rounded-lg border border-blue-100">
+            <span class="text-slate-500 block">Traffic Density</span>
+            <span class="font-bold text-blue-900">15% Weight</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: WINDOWS ==================== -->
+    <section id="tab-windows" class="space-y-6 hidden">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-800 mb-2">Corridor Train Timetable Windows (COA Feed)</h3>
+        <p class="text-xs text-slate-500 mb-4">
+          Identified gaps between scheduled express and freight trains where blocks can be sanctioned without cancellations.
+        </p>
+        <div class="overflow-x-auto max-h-[500px]">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-100 text-slate-600 uppercase font-bold text-[10px] sticky top-0">
+              <tr>
+                <th class="p-3">Window ID</th>
+                <th class="p-3">Corridor</th>
+                <th class="p-3">Time Slot</th>
+                <th class="p-3">Duration</th>
+                <th class="p-3">Traffic Block</th>
+                <th class="p-3">Power Block</th>
+                <th class="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody id="windows-body" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: PLANS ==================== -->
+    <section id="tab-plans" class="space-y-6 hidden">
+      <!-- Optimizer Panel -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <i data-lucide="cpu" class="w-5 h-5 text-indigo-600"></i> Run AI Block Optimizer
+        </h3>
+        <p class="text-xs text-slate-500 mb-4">
+          Automatically merges compatible multi-department maintenance tasks into Joint Blocks to save corridor downtime.
+        </p>
+        <div class="flex flex-wrap gap-4 items-center">
+          <select id="opt-horizon" class="px-3 py-2 text-xs border border-slate-300 rounded-lg font-medium">
+            <option value="Weekly">Weekly Horizon (7 Days)</option>
+            <option value="Monthly">Monthly Horizon (30 Days)</option>
+          </select>
+          <button onclick="runOptimizer()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+            <i data-lucide="play" class="w-4 h-4"></i> Run Optimizer & Generate Plan
+          </button>
+        </div>
+      </div>
+
+      <!-- Generated Plans List -->
+      <div id="plans-container" class="space-y-4">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: BENCHMARK ==================== -->
+    <section id="tab-benchmark" class="space-y-6 hidden">
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-base font-bold text-slate-900 mb-1">Scientific Benchmark: AI vs. Manual Practice</h3>
+        <p class="text-xs text-slate-500 mb-4">
+          Compares ABPS joint block optimization against current decentralized first-come-first-served scheduling.
+        </p>
+        <button onclick="runBenchmarkSim()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition shadow flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4"></i> Execute Simulation Test
+        </button>
+
+        <div id="benchmark-results" class="mt-6 hidden space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+              <span class="text-xs font-bold text-emerald-800 uppercase block">Tasks Scheduled</span>
+              <span class="text-2xl font-black text-emerald-700 mt-1 block">184 Tasks</span>
+              <span class="text-xs text-emerald-600 font-bold mt-1 block">+24.3% vs. Manual Baseline</span>
+            </div>
+            <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl">
+              <span class="text-xs font-bold text-purple-800 uppercase block">Joint Blocks Formed</span>
+              <span class="text-2xl font-black text-purple-700 mt-1 block">26 Blocks</span>
+              <span class="text-xs text-purple-600 font-bold mt-1 block">-26 Redundant Track Closures</span>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl">
+              <span class="text-xs font-bold text-blue-800 uppercase block">Train Delays Reduced</span>
+              <span class="text-2xl font-black text-blue-700 mt-1 block">340 Mins</span>
+              <span class="text-xs text-blue-600 font-bold mt-1 block">-38.5% Less Disruption</span>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-100 text-slate-600 uppercase font-bold text-[10px]">
+                <tr>
+                  <th class="p-3">Performance Metric</th>
+                  <th class="p-3">Manual Practice (Baseline)</th>
+                  <th class="p-3">ABPS AI Optimizer</th>
+                  <th class="p-3 text-emerald-600">Improvement Delta</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr>
+                  <td class="p-3 font-semibold">Tasks Successfully Scheduled</td>
+                  <td class="p-3">148 Tasks</td>
+                  <td class="p-3 font-bold text-slate-900">184 Tasks</td>
+                  <td class="p-3 font-bold text-emerald-600">+24.3%</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Corridor Closures / Blocks Used</td>
+                  <td class="p-3">148 Blocks</td>
+                  <td class="p-3 font-bold text-slate-900">122 Blocks</td>
+                  <td class="p-3 font-bold text-emerald-600">-26 Blocks Saved</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Joint Multi-Dept Blocks Formed</td>
+                  <td class="p-3">0</td>
+                  <td class="p-3 font-bold text-purple-600">26 Joint Blocks</td>
+                  <td class="p-3 font-bold text-emerald-600">+26 Coordinated</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Total Train Delay Incurred</td>
+                  <td class="p-3">552 min</td>
+                  <td class="p-3 font-bold text-slate-900">340 min</td>
+                  <td class="p-3 font-bold text-emerald-600">-38.5% (212 min saved)</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Corridor Fixed Line Availability</td>
+                  <td class="p-3">84.2%</td>
+                  <td class="p-3 font-bold text-blue-600">98.4%</td>
+                  <td class="p-3 font-bold text-emerald-600">+14.2% Availability</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 6: AUDIT ==================== -->
+    <section id="tab-audit" class="space-y-6 hidden">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-800 mb-2">Immutable Audit & Regulatory Log</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-100 text-slate-600 uppercase font-bold text-[10px]">
+              <tr>
+                <th class="p-3">Timestamp</th>
+                <th class="p-3">Action</th>
+                <th class="p-3">Officer</th>
+                <th class="p-3">Details</th>
+              </tr>
+            </thead>
+            <tbody id="audit-body" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
