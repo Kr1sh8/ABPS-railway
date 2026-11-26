@@ -10,16 +10,18 @@ def create_deck(filename):
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
     
+    # Elegant Color Palette
     c_navy = RGBColor(11, 37, 69)      # #0b2545
     c_blue = RGBColor(19, 64, 116)     # #134074
-    c_link_blue = RGBColor(37, 99, 235)# #2563eb
+    c_btn_blue = RGBColor(29, 78, 216) # #1d4ed8
+    c_btn_green = RGBColor(21, 128, 61)# #15803d
     c_gold = RGBColor(244, 162, 97)    # #f4a261
     c_dark = RGBColor(15, 23, 42)      # #0f172a
     c_slate = RGBColor(71, 85, 105)    # #475569
     c_light = RGBColor(248, 250, 252)  # #f8fafc
     c_white = RGBColor(255, 255, 255)
-    c_green = RGBColor(22, 163, 74)    # #16a34a
     c_purple = RGBColor(147, 51, 234)  # #9333ea
+    c_card_bg = RGBColor(241, 245, 249)# #f1f5f9
 
     blank_layout = prs.slide_layouts[6]
 
@@ -89,7 +91,7 @@ def create_deck(filename):
         return shape
 
     # ==============================================================
-    # SLIDE 1: TITLE SLIDE (WITH CLICKABLE HYPERLINKS & ALL 3 TEAM MEMBERS)
+    # SLIDE 1: TITLE SLIDE (WITH CRISP WHITE CARDS & STANDOUT BUTTONS)
     # ==============================================================
     s1 = prs.slides.add_slide(blank_layout)
     bg1 = s1.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(13.333), Inches(7.5))
@@ -97,120 +99,137 @@ def create_deck(filename):
     bg1.fill.fore_color.rgb = c_navy
     bg1.line.fill.background()
 
-    # Title card container
-    tbox = s1.shapes.add_textbox(Inches(0.9), Inches(0.6), Inches(11.5), Inches(2.2))
+    # Title header text
+    tbox = s1.shapes.add_textbox(Inches(0.9), Inches(0.4), Inches(11.5), Inches(1.8))
     tf1 = tbox.text_frame
     tf1.word_wrap = True
 
     p0 = tf1.paragraphs[0]
     p0.text = "MINISTRY OF RAILWAYS | PROBLEM STATEMENT 26027"
     p0.font.name = "Arial"
-    p0.font.size = Pt(11)
+    p0.font.size = Pt(10.5)
     p0.font.bold = True
     p0.font.color.rgb = c_gold
 
     p1 = tf1.add_paragraph()
     p1.text = "Automatic Block Planning System (ABPS)"
     p1.font.name = "Arial"
-    p1.font.size = Pt(30)
+    p1.font.size = Pt(28)
     p1.font.bold = True
     p1.font.color.rgb = c_white
-    p1.space_before = Pt(4)
+    p1.space_before = Pt(3)
 
     p2 = tf1.add_paragraph()
     p2.text = "AI-Driven Multi-Department Maintenance Scheduling & Corridor Coordination"
     p2.font.name = "Calibri"
-    p2.font.size = Pt(15)
+    p2.font.size = Pt(14)
     p2.font.color.rgb = RGBColor(144, 224, 239)
-    p2.space_before = Pt(4)
+    p2.space_before = Pt(3)
 
-    # CLICKABLE REPO & DEMO BANNER
-    link_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(2.9), Inches(11.5), Inches(2.0))
-    link_card.fill.solid()
-    link_card.fill.fore_color.rgb = RGBColor(19, 64, 116)
-    link_card.line.color.rgb = c_gold
-    link_card.line.width = Pt(2.5)
+    # CRISP WHITE HIGH-CONTRAST CARD FOR LINKS
+    link_container = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(2.35), Inches(11.5), Inches(2.7))
+    link_container.fill.solid()
+    link_container.fill.fore_color.rgb = c_white
+    link_container.line.color.rgb = c_gold
+    link_container.line.width = Pt(2)
 
-    ltf = link_card.text_frame
-    ltf.word_wrap = True
-    ltf.margin_left = Inches(0.4)
-    ltf.margin_top = Inches(0.18)
+    lctf = link_container.text_frame
+    lctf.margin_left = Inches(0.4)
+    lctf.margin_top = Inches(0.2)
+    lcp0 = lctf.paragraphs[0]
+    lcp0.text = "🔗 OFFICIAL PROJECT REPOSITORY & LIVE DEPLOYMENT (CLICKABLE BUTTONS):"
+    lcp0.font.name = "Arial"
+    lcp0.font.size = Pt(12)
+    lcp0.font.bold = True
+    lcp0.font.color.rgb = c_navy
 
-    lp1 = ltf.paragraphs[0]
-    lp1.text = "🔗 OFFICIAL PROJECT REPOSITORY & LIVE DEMO (CLICKABLE LINKS FOR EVALUATORS):"
-    lp1.font.name = "Arial"
-    lp1.font.size = Pt(12)
-    lp1.font.bold = True
-    lp1.font.color.rgb = c_gold
+    # BUTTON 1: GITHUB REPO (HIGH CONTRAST BLUE BUTTON)
+    btn_gh = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.3), Inches(2.95), Inches(10.7), Inches(0.85))
+    btn_gh.fill.solid()
+    btn_gh.fill.fore_color.rgb = c_btn_blue
+    btn_gh.line.color.rgb = RGBColor(30, 58, 138)
+    btn_gh.line.width = Pt(1.5)
+    btn_gh.click_action.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
 
-    # Hyperlinked Paragraph for GitHub
-    lp2 = ltf.add_paragraph()
-    lp2.space_before = Pt(6)
-    run_gh_label = lp2.add_run()
-    run_gh_label.text = "📂 GitHub Source Code Repository: "
-    run_gh_label.font.name = "Arial"
-    run_gh_label.font.size = Pt(13)
-    run_gh_label.font.bold = True
-    run_gh_label.font.color.rgb = c_white
+    tf_gh = btn_gh.text_frame
+    tf_gh.word_wrap = True
+    tf_gh.margin_left = Inches(0.3)
+    tf_gh.margin_top = Inches(0.12)
+    
+    p_gh1 = tf_gh.paragraphs[0]
+    p_gh1.text = "📂 CLICK HERE TO OPEN GITHUB REPOSITORY:"
+    p_gh1.font.name = "Arial"
+    p_gh1.font.size = Pt(10.5)
+    p_gh1.font.bold = True
+    p_gh1.font.color.rgb = c_gold
 
-    run_gh_link = lp2.add_run()
-    run_gh_link.text = "https://github.com/Kr1sh8/ABPS-railway"
-    run_gh_link.font.name = "Arial"
-    run_gh_link.font.size = Pt(13)
-    run_gh_link.font.bold = True
-    run_gh_link.font.color.rgb = RGBColor(254, 240, 138)
-    run_gh_link.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
+    p_gh2 = tf_gh.add_paragraph()
+    p_gh2.space_before = Pt(2)
+    run_gh = p_gh2.add_run()
+    run_gh.text = "https://github.com/Kr1sh8/ABPS-railway"
+    run_gh.font.name = "Arial"
+    run_gh.font.size = Pt(14)
+    run_gh.font.bold = True
+    run_gh.font.underline = True
+    run_gh.font.color.rgb = c_white
+    run_gh.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
 
-    # Hyperlinked Paragraph for Live App
-    lp3 = ltf.add_paragraph()
-    lp3.space_before = Pt(4)
-    run_app_label = lp3.add_run()
-    run_app_label.text = "🌐 Direct Working Web App: "
-    run_app_label.font.name = "Arial"
-    run_app_label.font.size = Pt(13)
-    run_app_label.font.bold = True
-    run_app_label.font.color.rgb = c_white
+    # BUTTON 2: DIRECT LIVE WEB PORTAL (HIGH CONTRAST EMERALD GREEN BUTTON)
+    btn_app = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.3), Inches(3.95), Inches(10.7), Inches(0.85))
+    btn_app.fill.solid()
+    btn_app.fill.fore_color.rgb = c_btn_green
+    btn_app.line.color.rgb = RGBColor(20, 83, 45)
+    btn_app.line.width = Pt(1.5)
+    btn_app.click_action.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
 
-    run_app_link = lp3.add_run()
-    run_app_link.text = "https://kr1sh8.github.io/ABPS-railway/"
-    run_app_link.font.name = "Arial"
-    run_app_link.font.size = Pt(13)
-    run_app_link.font.bold = True
-    run_app_link.font.color.rgb = RGBColor(187, 247, 208)
-    run_app_link.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
+    tf_app = btn_app.text_frame
+    tf_app.word_wrap = True
+    tf_app.margin_left = Inches(0.3)
+    tf_app.margin_top = Inches(0.12)
+    
+    p_app1 = tf_app.paragraphs[0]
+    p_app1.text = "🌐 CLICK HERE TO OPEN LIVE WORKING WEB APP (ZERO INSTALL):"
+    p_app1.font.name = "Arial"
+    p_app1.font.size = Pt(10.5)
+    p_app1.font.bold = True
+    p_app1.font.color.rgb = RGBColor(254, 240, 138)
 
-    lp4 = ltf.add_paragraph()
-    lp4.text = "   (Evaluation Credentials — Username: admin  |  Password: admin123)"
-    lp4.font.name = "Calibri"
-    lp4.font.size = Pt(10.5)
-    lp4.font.color.rgb = RGBColor(203, 213, 225)
-    lp4.space_before = Pt(2)
+    p_app2 = tf_app.add_paragraph()
+    p_app2.space_before = Pt(2)
+    run_app = p_app2.add_run()
+    run_app.text = "https://kr1sh8.github.io/ABPS-railway/   (Credentials: admin / admin123)"
+    run_app.font.name = "Arial"
+    run_app.font.size = Pt(13)
+    run_app.font.bold = True
+    run_app.font.underline = True
+    run_app.font.color.rgb = c_white
+    run_app.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
 
-    # Team Members Card (Prominently listing all 3 people)
-    team_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(5.1), Inches(11.5), Inches(1.8))
+    # CRISP WHITE HIGH-CONTRAST CARD FOR TEAM MEMBERS
+    team_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(5.25), Inches(11.5), Inches(1.9))
     team_card.fill.solid()
-    team_card.fill.fore_color.rgb = RGBColor(15, 23, 42)
-    team_card.line.color.rgb = RGBColor(51, 65, 85)
-    team_card.line.width = Pt(1)
+    team_card.fill.fore_color.rgb = c_white
+    team_card.line.color.rgb = RGBColor(203, 213, 225)
+    team_card.line.width = Pt(1.5)
 
     ttf = team_card.text_frame
     ttf.word_wrap = True
-    ttf.margin_left = Inches(0.35)
-    ttf.margin_top = Inches(0.16)
+    ttf.margin_left = Inches(0.4)
+    ttf.margin_top = Inches(0.18)
 
     tp0 = ttf.paragraphs[0]
     tp0.text = "👥 PROJECT DEVELOPMENT TEAM (COMPUTER SCIENCE & ENGINEERING):"
     tp0.font.name = "Arial"
     tp0.font.size = Pt(11)
     tp0.font.bold = True
-    tp0.font.color.rgb = c_gold
+    tp0.font.color.rgb = c_navy
 
     tp1 = ttf.add_paragraph()
     tp1.text = "1. Krish Desai (Project Lead) — Backend Architecture, CP-SAT Optimization Engine & API Services"
     tp1.font.name = "Calibri"
     tp1.font.size = Pt(11.5)
     tp1.font.bold = True
-    tp1.font.color.rgb = c_white
+    tp1.font.color.rgb = c_dark
     tp1.space_before = Pt(3)
 
     tp2 = ttf.add_paragraph()
@@ -218,7 +237,7 @@ def create_deck(filename):
     tp2.font.name = "Calibri"
     tp2.font.size = Pt(11.5)
     tp2.font.bold = True
-    tp2.font.color.rgb = c_white
+    tp2.font.color.rgb = c_dark
     tp2.space_before = Pt(2)
 
     tp3 = ttf.add_paragraph()
@@ -226,7 +245,7 @@ def create_deck(filename):
     tp3.font.name = "Calibri"
     tp3.font.size = Pt(11.5)
     tp3.font.bold = True
-    tp3.font.color.rgb = c_white
+    tp3.font.color.rgb = c_dark
     tp3.space_before = Pt(2)
 
     # ==============================================================
@@ -291,7 +310,7 @@ def create_deck(filename):
                  "Generates 30-day macro plans and 7-day exact corridor schedules.",
                  "Keeps Human-in-the-Loop: Sr. DEN / Sr. DOM review & sanction.",
                  "Real-time Benchmark Simulator showing quantitative improvement."
-             ], c_green)
+             ], c_btn_green)
 
     # ==============================================================
     # SLIDE 4: SYSTEM ARCHITECTURE
@@ -334,7 +353,7 @@ def create_deck(filename):
                  "🔵 Engg | 🟢 S&T | 🟠 TRD",
                  "🟣 Coordinated Joint Blocks",
                  "Live GitHub Pages + Streamlit interfaces."
-             ], c_green)
+             ], c_btn_green)
 
     # ==============================================================
     # SLIDE 5: AI SCORING & OPTIMIZATION FORMULATION
@@ -414,7 +433,7 @@ def create_deck(filename):
     m1 = s6.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.6), Inches(3.6), Inches(1.8))
     m1.fill.solid()
     m1.fill.fore_color.rgb = RGBColor(240, 253, 244)
-    m1.line.color.rgb = c_green
+    m1.line.color.rgb = c_btn_green
     m1.line.width = Pt(2)
     m1.text_frame.margin_left = Inches(0.3)
     m1.text_frame.margin_top = Inches(0.25)
@@ -422,7 +441,7 @@ def create_deck(filename):
     p.text = "TASKS SCHEDULED"
     p.font.size = Pt(10)
     p.font.bold = True
-    p.font.color.rgb = c_green
+    p.font.color.rgb = c_btn_green
     p2 = m1.text_frame.add_paragraph()
     p2.text = "184 Tasks (+24.3%)"
     p2.font.size = Pt(22)
@@ -511,7 +530,7 @@ def create_deck(filename):
             cell.fill.fore_color.rgb = c_white if r_idx % 2 == 0 else c_light
             for p in cell.text_frame.paragraphs:
                 p.font.size = Pt(9.5)
-                p.font.color.rgb = c_green if c_idx == 3 else c_dark
+                p.font.color.rgb = c_btn_green if c_idx == 3 else c_dark
                 if c_idx in (2, 3):
                     p.font.bold = True
 
@@ -552,10 +571,10 @@ def create_deck(filename):
                  "Click '📢 Publish' to transmit to station controllers.",
                  "Inspect 'Audit Trail' tab for tamper-evident logging.",
                  "Run 'AI Benchmark' to verify measurable KPI gains."
-             ], c_green)
+             ], c_btn_green)
 
     # ==============================================================
-    # SLIDE 8: SUMMARY & CONCLUSION (CLICKABLE HYPERLINKS)
+    # SLIDE 8: SUMMARY & CONCLUSION (CLEAR WHITE CARD WITH BUTTONS)
     # ==============================================================
     s8 = prs.slides.add_slide(blank_layout)
     add_header(s8, "Project Summary & Submission Details")
@@ -569,7 +588,7 @@ def create_deck(filename):
                  "5. Complete IEEE 830 documentation, test suites, and SE lab architecture diagrams (DFD 0/1, Use Case, Class, Swimlane, Sequence)."
              ], c_blue)
 
-    # Card with clickable hyperlinks on final slide
+    # Clean White Card on Slide 8
     link_card_end = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.8), Inches(1.6), Inches(5.7), Inches(5.2))
     link_card_end.fill.solid()
     link_card_end.fill.fore_color.rgb = c_white
@@ -582,55 +601,81 @@ def create_deck(filename):
     etf.margin_top = Inches(0.2)
 
     ep0 = etf.paragraphs[0]
-    ep0.text = "📦 Evaluation Resources & Verification (Clickable):"
+    ep0.text = "📦 Evaluation Resources & Verification (Clickable Buttons):"
     ep0.font.name = "Arial"
     ep0.font.size = Pt(12)
     ep0.font.bold = True
     ep0.font.color.rgb = c_navy
 
-    ep1 = etf.add_paragraph()
-    ep1.space_before = Pt(8)
-    r1_lbl = ep1.add_run()
-    r1_lbl.text = "• Official GitHub Repository:\n  "
-    r1_lbl.font.size = Pt(10.5)
-    r1_lbl.font.bold = True
-    r1_lbl.font.color.rgb = c_dark
-    r1_lnk = ep1.add_run()
-    r1_lnk.text = "https://github.com/Kr1sh8/ABPS-railway"
-    r1_lnk.font.size = Pt(10.5)
-    r1_lnk.font.bold = True
-    r1_lnk.font.color.rgb = c_link_blue
-    r1_lnk.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
+    # Slide 8 Button 1 (GitHub)
+    btn_end_gh = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.1), Inches(2.2), Inches(5.1), Inches(0.75))
+    btn_end_gh.fill.solid()
+    btn_end_gh.fill.fore_color.rgb = c_btn_blue
+    btn_end_gh.line.color.rgb = RGBColor(30, 58, 138)
+    btn_end_gh.click_action.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
 
-    ep2 = etf.add_paragraph()
-    ep2.space_before = Pt(8)
-    r2_lbl = ep2.add_run()
-    r2_lbl.text = "• Direct Live Web App (Zero-install):\n  "
-    r2_lbl.font.size = Pt(10.5)
-    r2_lbl.font.bold = True
-    r2_lbl.font.color.rgb = c_dark
-    r2_lnk = ep2.add_run()
-    r2_lnk.text = "https://kr1sh8.github.io/ABPS-railway/"
-    r2_lnk.font.size = Pt(10.5)
-    r2_lnk.font.bold = True
-    r2_lnk.font.color.rgb = c_green
-    r2_lnk.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
+    tf_egh = btn_end_gh.text_frame
+    tf_egh.margin_left = Inches(0.2)
+    tf_egh.margin_top = Inches(0.12)
+    p_e1 = tf_egh.paragraphs[0]
+    p_e1.text = "📂 Open GitHub Repository (Click Here)"
+    p_e1.font.name = "Arial"
+    p_e1.font.size = Pt(11.5)
+    p_e1.font.bold = True
+    p_e1.font.color.rgb = c_white
+    p_e2 = tf_egh.add_paragraph()
+    p_e2.text = "https://github.com/Kr1sh8/ABPS-railway"
+    p_e2.font.size = Pt(9.5)
+    p_e2.font.color.rgb = c_gold
+    p_e2.font.underline = True
 
-    ep3 = etf.add_paragraph()
-    ep3.text = "• Evaluator Credentials:\n  Administrator: admin / admin123\n  Department Planner: planner1 / plan123\n  Sanctioning Authority: approver / approve123"
-    ep3.font.size = Pt(10)
-    ep3.font.color.rgb = c_slate
-    ep3.space_before = Pt(8)
+    # Slide 8 Button 2 (Live App)
+    btn_end_app = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.1), Inches(3.05), Inches(5.1), Inches(0.75))
+    btn_end_app.fill.solid()
+    btn_end_app.fill.fore_color.rgb = c_btn_green
+    btn_end_app.line.color.rgb = RGBColor(20, 83, 45)
+    btn_end_app.click_action.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
 
-    ep4 = etf.add_paragraph()
-    ep4.text = "• Team Members:\n  Krish Desai | Krish Mittal | Krishna Rathore"
-    ep4.font.size = Pt(10.5)
-    ep4.font.bold = True
-    ep4.font.color.rgb = c_navy
-    ep4.space_before = Pt(8)
+    tf_eapp = btn_end_app.text_frame
+    tf_eapp.margin_left = Inches(0.2)
+    tf_eapp.margin_top = Inches(0.12)
+    p_ea1 = tf_eapp.paragraphs[0]
+    p_ea1.text = "🌐 Open Live Working Web App (Click Here)"
+    p_ea1.font.name = "Arial"
+    p_ea1.font.size = Pt(11.5)
+    p_ea1.font.bold = True
+    p_ea1.font.color.rgb = c_white
+    p_ea2 = tf_eapp.add_paragraph()
+    p_ea2.text = "https://kr1sh8.github.io/ABPS-railway/"
+    p_ea2.font.size = Pt(9.5)
+    p_ea2.font.color.rgb = RGBColor(254, 240, 138)
+    p_ea2.font.underline = True
+
+    # Slide 8 Team Members Details
+    s8_team_box = s8.shapes.add_textbox(Inches(7.1), Inches(3.9), Inches(5.1), Inches(2.6))
+    sttf = s8_team_box.text_frame
+    sttf.word_wrap = True
+    stp1 = sttf.paragraphs[0]
+    stp1.text = "👥 Team Members (CSE Department):"
+    stp1.font.bold = True
+    stp1.font.size = Pt(11)
+    stp1.font.color.rgb = c_navy
+    
+    members = [
+        "1. Krish Desai (Project Lead) - Backend & Optimizer",
+        "2. Krish Mittal - AI Priority Scoring & Benchmarks",
+        "3. Krishna Rathore - Frontend UI/UX & Quality Assurance"
+    ]
+    for m in members:
+        pm = sttf.add_paragraph()
+        pm.text = "• " + m
+        pm.font.size = Pt(10)
+        pm.font.color.rgb = c_dark
+        pm.font.bold = True
+        pm.space_before = Pt(3)
 
     prs.save(filename)
-    print(f"✅ Generated clickable presentation PPTX: {filename}")
+    print(f"✅ Generated high-contrast clickable presentation PPTX: {filename}")
 
 if __name__ == "__main__":
     output_pptx = r"c:\Users\Hp\OneDrive\Desktop\railway system\ABPS_Project_Presentation.pptx"
