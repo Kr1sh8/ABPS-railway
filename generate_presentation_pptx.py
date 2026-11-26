@@ -7,39 +7,33 @@ from pptx.enum.shapes import MSO_SHAPE
 
 def create_deck(filename):
     prs = Presentation()
-    # 16:9 Widescreen standard
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
     
-    # Color Palette: Deep Railway Navy, Warm Gold, Slate & Pure White
     c_navy = RGBColor(11, 37, 69)      # #0b2545
     c_blue = RGBColor(19, 64, 116)     # #134074
+    c_link_blue = RGBColor(37, 99, 235)# #2563eb
     c_gold = RGBColor(244, 162, 97)    # #f4a261
     c_dark = RGBColor(15, 23, 42)      # #0f172a
     c_slate = RGBColor(71, 85, 105)    # #475569
     c_light = RGBColor(248, 250, 252)  # #f8fafc
     c_white = RGBColor(255, 255, 255)
-    c_card_bg = RGBColor(255, 255, 255)
     c_green = RGBColor(22, 163, 74)    # #16a34a
-    c_red = RGBColor(220, 38, 38)      # #dc2626
     c_purple = RGBColor(147, 51, 234)  # #9333ea
 
     blank_layout = prs.slide_layouts[6]
 
     def add_header(slide, title_text, category_text="INDIAN RAILWAYS • CENTRAL MAINTENANCE CONTROL"):
-        # Header background bar
         h_shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(13.333), Inches(1.15))
         h_shape.fill.solid()
         h_shape.fill.fore_color.rgb = c_navy
         h_shape.line.fill.background()
 
-        # Accent line under header
         line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(1.15), Inches(13.333), Inches(0.06))
         line.fill.solid()
         line.fill.fore_color.rgb = c_gold
         line.line.fill.background()
 
-        # Text
         tf = h_shape.text_frame
         tf.word_wrap = True
         tf.margin_left = Inches(0.8)
@@ -95,7 +89,7 @@ def create_deck(filename):
         return shape
 
     # ==============================================================
-    # SLIDE 1: TITLE SLIDE (WITH PROMINENT REPO LINK & LIVE DEMO)
+    # SLIDE 1: TITLE SLIDE (WITH CLICKABLE HYPERLINKS & ALL 3 TEAM MEMBERS)
     # ==============================================================
     s1 = prs.slides.add_slide(blank_layout)
     bg1 = s1.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(13.333), Inches(7.5))
@@ -104,7 +98,7 @@ def create_deck(filename):
     bg1.line.fill.background()
 
     # Title card container
-    tbox = s1.shapes.add_textbox(Inches(1.0), Inches(0.8), Inches(11.333), Inches(3.2))
+    tbox = s1.shapes.add_textbox(Inches(0.9), Inches(0.6), Inches(11.5), Inches(2.2))
     tf1 = tbox.text_frame
     tf1.word_wrap = True
 
@@ -118,70 +112,122 @@ def create_deck(filename):
     p1 = tf1.add_paragraph()
     p1.text = "Automatic Block Planning System (ABPS)"
     p1.font.name = "Arial"
-    p1.font.size = Pt(32)
+    p1.font.size = Pt(30)
     p1.font.bold = True
     p1.font.color.rgb = c_white
-    p1.space_before = Pt(6)
+    p1.space_before = Pt(4)
 
     p2 = tf1.add_paragraph()
     p2.text = "AI-Driven Multi-Department Maintenance Scheduling & Corridor Coordination"
     p2.font.name = "Calibri"
-    p2.font.size = Pt(16)
+    p2.font.size = Pt(15)
     p2.font.color.rgb = RGBColor(144, 224, 239)
-    p2.space_before = Pt(6)
+    p2.space_before = Pt(4)
 
-    # Big Highlights Banner: GITHUB REPO & LIVE LINK
-    link_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.0), Inches(3.8), Inches(11.333), Inches(1.5))
+    # CLICKABLE REPO & DEMO BANNER
+    link_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(2.9), Inches(11.5), Inches(2.0))
     link_card.fill.solid()
     link_card.fill.fore_color.rgb = RGBColor(19, 64, 116)
     link_card.line.color.rgb = c_gold
-    link_card.line.width = Pt(2)
+    link_card.line.width = Pt(2.5)
 
     ltf = link_card.text_frame
     ltf.word_wrap = True
     ltf.margin_left = Inches(0.4)
-    ltf.margin_top = Inches(0.2)
+    ltf.margin_top = Inches(0.18)
 
     lp1 = ltf.paragraphs[0]
-    lp1.text = "🔗 OFFICIAL PROJECT REPOSITORY & LIVE DEPLOYMENT:"
+    lp1.text = "🔗 OFFICIAL PROJECT REPOSITORY & LIVE DEMO (CLICKABLE LINKS FOR EVALUATORS):"
     lp1.font.name = "Arial"
     lp1.font.size = Pt(12)
     lp1.font.bold = True
     lp1.font.color.rgb = c_gold
 
+    # Hyperlinked Paragraph for GitHub
     lp2 = ltf.add_paragraph()
-    lp2.text = "📂 GitHub Source Code Repository: https://github.com/Kr1sh8/ABPS-railway"
-    lp2.font.name = "Arial"
-    lp2.font.size = Pt(14)
-    lp2.font.bold = True
-    lp2.font.color.rgb = c_white
-    lp2.space_before = Pt(4)
+    lp2.space_before = Pt(6)
+    run_gh_label = lp2.add_run()
+    run_gh_label.text = "📂 GitHub Source Code Repository: "
+    run_gh_label.font.name = "Arial"
+    run_gh_label.font.size = Pt(13)
+    run_gh_label.font.bold = True
+    run_gh_label.font.color.rgb = c_white
 
+    run_gh_link = lp2.add_run()
+    run_gh_link.text = "https://github.com/Kr1sh8/ABPS-railway"
+    run_gh_link.font.name = "Arial"
+    run_gh_link.font.size = Pt(13)
+    run_gh_link.font.bold = True
+    run_gh_link.font.color.rgb = RGBColor(254, 240, 138)
+    run_gh_link.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
+
+    # Hyperlinked Paragraph for Live App
     lp3 = ltf.add_paragraph()
-    lp3.text = "🌐 Direct Live Web App: https://kr1sh8.github.io/ABPS-railway/   (Demo: admin / admin123)"
-    lp3.font.name = "Calibri"
-    lp3.font.size = Pt(12)
-    lp3.font.bold = True
-    lp3.font.color.rgb = RGBColor(220, 252, 231)
-    lp3.space_before = Pt(3)
+    lp3.space_before = Pt(4)
+    run_app_label = lp3.add_run()
+    run_app_label.text = "🌐 Direct Working Web App: "
+    run_app_label.font.name = "Arial"
+    run_app_label.font.size = Pt(13)
+    run_app_label.font.bold = True
+    run_app_label.font.color.rgb = c_white
 
-    # Team Credits
-    team_box = s1.shapes.add_textbox(Inches(1.0), Inches(5.6), Inches(11.333), Inches(1.4))
-    ttf = team_box.text_frame
-    tp1 = ttf.paragraphs[0]
-    tp1.text = "Student Team & Roles (Medicaps University - Computer Science & Engineering):"
-    tp1.font.name = "Arial"
-    tp1.font.size = Pt(11)
+    run_app_link = lp3.add_run()
+    run_app_link.text = "https://kr1sh8.github.io/ABPS-railway/"
+    run_app_link.font.name = "Arial"
+    run_app_link.font.size = Pt(13)
+    run_app_link.font.bold = True
+    run_app_link.font.color.rgb = RGBColor(187, 247, 208)
+    run_app_link.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
+
+    lp4 = ltf.add_paragraph()
+    lp4.text = "   (Evaluation Credentials — Username: admin  |  Password: admin123)"
+    lp4.font.name = "Calibri"
+    lp4.font.size = Pt(10.5)
+    lp4.font.color.rgb = RGBColor(203, 213, 225)
+    lp4.space_before = Pt(2)
+
+    # Team Members Card (Prominently listing all 3 people)
+    team_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(5.1), Inches(11.5), Inches(1.8))
+    team_card.fill.solid()
+    team_card.fill.fore_color.rgb = RGBColor(15, 23, 42)
+    team_card.line.color.rgb = RGBColor(51, 65, 85)
+    team_card.line.width = Pt(1)
+
+    ttf = team_card.text_frame
+    ttf.word_wrap = True
+    ttf.margin_left = Inches(0.35)
+    ttf.margin_top = Inches(0.16)
+
+    tp0 = ttf.paragraphs[0]
+    tp0.text = "👥 PROJECT DEVELOPMENT TEAM (COMPUTER SCIENCE & ENGINEERING):"
+    tp0.font.name = "Arial"
+    tp0.font.size = Pt(11)
+    tp0.font.bold = True
+    tp0.font.color.rgb = c_gold
+
+    tp1 = ttf.add_paragraph()
+    tp1.text = "1. Krish Desai (Project Lead) — Backend Architecture, CP-SAT Optimization Engine & API Services"
+    tp1.font.name = "Calibri"
+    tp1.font.size = Pt(11.5)
     tp1.font.bold = True
-    tp1.font.color.rgb = c_gold
+    tp1.font.color.rgb = c_white
+    tp1.space_before = Pt(3)
 
     tp2 = ttf.add_paragraph()
-    tp2.text = "• Krish Desai (Lead, Optimization Engine & Backend)  |  Enrolment: EN24CS3010550\n" \
-               "• Krish Mittal (AI Priority Scoring & Benchmark Data)  |  Krishna Rathore (Frontend Dashboard & Testing)"
+    tp2.text = "2. Krish Mittal — AI Priority Scoring Formulation, Data Pipelines & Comparative Benchmark Engine"
     tp2.font.name = "Calibri"
-    tp2.font.size = Pt(12)
+    tp2.font.size = Pt(11.5)
+    tp2.font.bold = True
     tp2.font.color.rgb = c_white
-    tp2.space_before = Pt(3)
+    tp2.space_before = Pt(2)
+
+    tp3 = ttf.add_paragraph()
+    tp3.text = "3. Krishna Rathore — Frontend Portal UI/UX, Interactive Gantt Timeline Visualizations & Quality Assurance"
+    tp3.font.name = "Calibri"
+    tp3.font.size = Pt(11.5)
+    tp3.font.bold = True
+    tp3.font.color.rgb = c_white
+    tp3.space_before = Pt(2)
 
     # ==============================================================
     # SLIDE 2: THE PROBLEM STATEMENT
@@ -203,7 +249,7 @@ def create_deck(filename):
                  "Result: Track Dept halts trains at 10:00 AM.",
                  "Signal Dept halts trains at 4:00 PM on the same line.",
                  "Duplicate track closures lead to heavy delays for express and goods trains."
-             ], c_red)
+             ], c_gold)
 
     add_card(s2, Inches(8.8), Inches(1.6), Inches(3.7), Inches(5.2),
              "3. Impact on Operations", [
@@ -211,7 +257,7 @@ def create_deck(filename):
                  "Severe Train Punctuality Loss: Hundreds of lost train minutes.",
                  "Safety Vulnerability: Delayed overdue safety-critical defects.",
                  "Suboptimal Scheduling: No unified optimization layer."
-             ], c_gold)
+             ], RGBColor(220, 38, 38))
 
     # ==============================================================
     # SLIDE 3: THE PROPOSED SOLUTION (ABPS)
@@ -509,7 +555,7 @@ def create_deck(filename):
              ], c_green)
 
     # ==============================================================
-    # SLIDE 8: SUMMARY & CONCLUSION
+    # SLIDE 8: SUMMARY & CONCLUSION (CLICKABLE HYPERLINKS)
     # ==============================================================
     s8 = prs.slides.add_slide(blank_layout)
     add_header(s8, "Project Summary & Submission Details")
@@ -523,27 +569,68 @@ def create_deck(filename):
                  "5. Complete IEEE 830 documentation, test suites, and SE lab architecture diagrams (DFD 0/1, Use Case, Class, Swimlane, Sequence)."
              ], c_blue)
 
-    add_card(s8, Inches(6.8), Inches(1.6), Inches(5.7), Inches(5.2),
-             "📦 Evaluation Resources & Verification", [
-                 "• GitHub Source Code Repository (Public):",
-                 "  https://github.com/Kr1sh8/ABPS-railway",
-                 "",
-                 "• Direct Live Working Portal (Zero-install):",
-                 "  https://kr1sh8.github.io/ABPS-railway/",
-                 "",
-                 "• Evaluator Access Credentials:",
-                 "  Administrator: admin / admin123",
-                 "  Department Planner: planner1 / plan123",
-                 "  Sanctioning Authority: approver / approve123",
-                 "",
-                 "• Included Documentation:",
-                 "  - IEEE 830 Software Requirements Specification (PDF)",
-                 "  - Full Project Presentation (PPTX)",
-                 "  - Complete Source Code Zip Archive"
-             ], c_gold)
+    # Card with clickable hyperlinks on final slide
+    link_card_end = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.8), Inches(1.6), Inches(5.7), Inches(5.2))
+    link_card_end.fill.solid()
+    link_card_end.fill.fore_color.rgb = c_white
+    link_card_end.line.color.rgb = c_gold
+    link_card_end.line.width = Pt(1.5)
+
+    etf = link_card_end.text_frame
+    etf.word_wrap = True
+    etf.margin_left = Inches(0.3)
+    etf.margin_top = Inches(0.2)
+
+    ep0 = etf.paragraphs[0]
+    ep0.text = "📦 Evaluation Resources & Verification (Clickable):"
+    ep0.font.name = "Arial"
+    ep0.font.size = Pt(12)
+    ep0.font.bold = True
+    ep0.font.color.rgb = c_navy
+
+    ep1 = etf.add_paragraph()
+    ep1.space_before = Pt(8)
+    r1_lbl = ep1.add_run()
+    r1_lbl.text = "• Official GitHub Repository:\n  "
+    r1_lbl.font.size = Pt(10.5)
+    r1_lbl.font.bold = True
+    r1_lbl.font.color.rgb = c_dark
+    r1_lnk = ep1.add_run()
+    r1_lnk.text = "https://github.com/Kr1sh8/ABPS-railway"
+    r1_lnk.font.size = Pt(10.5)
+    r1_lnk.font.bold = True
+    r1_lnk.font.color.rgb = c_link_blue
+    r1_lnk.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
+
+    ep2 = etf.add_paragraph()
+    ep2.space_before = Pt(8)
+    r2_lbl = ep2.add_run()
+    r2_lbl.text = "• Direct Live Web App (Zero-install):\n  "
+    r2_lbl.font.size = Pt(10.5)
+    r2_lbl.font.bold = True
+    r2_lbl.font.color.rgb = c_dark
+    r2_lnk = ep2.add_run()
+    r2_lnk.text = "https://kr1sh8.github.io/ABPS-railway/"
+    r2_lnk.font.size = Pt(10.5)
+    r2_lnk.font.bold = True
+    r2_lnk.font.color.rgb = c_green
+    r2_lnk.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
+
+    ep3 = etf.add_paragraph()
+    ep3.text = "• Evaluator Credentials:\n  Administrator: admin / admin123\n  Department Planner: planner1 / plan123\n  Sanctioning Authority: approver / approve123"
+    ep3.font.size = Pt(10)
+    ep3.font.color.rgb = c_slate
+    ep3.space_before = Pt(8)
+
+    ep4 = etf.add_paragraph()
+    ep4.text = "• Team Members:\n  Krish Desai | Krish Mittal | Krishna Rathore"
+    ep4.font.size = Pt(10.5)
+    ep4.font.bold = True
+    ep4.font.color.rgb = c_navy
+    ep4.space_before = Pt(8)
 
     prs.save(filename)
-    print(f"✅ Generated professional Presentation PPTX: {filename}")
+    print(f"✅ Generated clickable presentation PPTX: {filename}")
 
 if __name__ == "__main__":
     output_pptx = r"c:\Users\Hp\OneDrive\Desktop\railway system\ABPS_Project_Presentation.pptx"
