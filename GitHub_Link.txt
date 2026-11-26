@@ -1,0 +1,28 @@
+========================================================================
+AUTOMATIC BLOCK PLANNING SYSTEM (ABPS)
+Ministry of Railways — Problem Statement 26027
+========================================================================
+
+PROJECT LINKS FOR EVALUATION:
+------------------------------------------------------------------------
+1. Official GitHub Source Code Repository:
+   https://github.com/Kr1sh8/ABPS-railway
+
+2. Direct Live Working Web Application (Zero-Installation, Accessible via Any Browser):
+   https://kr1sh8.github.io/ABPS-railway/
+
+DEFAULT EVALUATOR CREDENTIALS:
+------------------------------------------------------------------------
+• Administrator (Full Access)      : Username: admin    | Password: admin123
+• Department Planner (Engineering) : Username: planner1 | Password: plan123
+• Competent Approver (Sr. DEN)     : Username: approver | Password: approve123
+
+PROJECT DEVELOPMENT TEAM:
+------------------------------------------------------------------------
+1. Krish Desai (Project Lead)   - Backend Architecture, CP-SAT Optimization & APIs
+                                  Enrolment: EN24CS3010550
+2. Krish Mittal                 - AI Priority Scoring Formulation & Data Modelling
+3. Krishna Rathore              - Frontend Portal UI/UX & Quality Assurance
+
+Department of Computer Science & Engineering, Medi-Caps University
+========================================================================

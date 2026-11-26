@@ -2,7 +2,6 @@ import os
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
-from pptx.enum.text import PP_ALIGN
 from pptx.enum.shapes import MSO_SHAPE
 
 def create_deck(filename):
@@ -10,7 +9,6 @@ def create_deck(filename):
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
     
-    # Elegant Color Palette
     c_navy = RGBColor(11, 37, 69)      # #0b2545
     c_blue = RGBColor(19, 64, 116)     # #134074
     c_btn_blue = RGBColor(29, 78, 216) # #1d4ed8
@@ -21,7 +19,6 @@ def create_deck(filename):
     c_light = RGBColor(248, 250, 252)  # #f8fafc
     c_white = RGBColor(255, 255, 255)
     c_purple = RGBColor(147, 51, 234)  # #9333ea
-    c_card_bg = RGBColor(241, 245, 249)# #f1f5f9
 
     blank_layout = prs.slide_layouts[6]
 
@@ -99,7 +96,6 @@ def create_deck(filename):
     bg1.fill.fore_color.rgb = c_navy
     bg1.line.fill.background()
 
-    # Title header text
     tbox = s1.shapes.add_textbox(Inches(0.9), Inches(0.4), Inches(11.5), Inches(1.8))
     tf1 = tbox.text_frame
     tf1.word_wrap = True
@@ -126,7 +122,7 @@ def create_deck(filename):
     p2.font.color.rgb = RGBColor(144, 224, 239)
     p2.space_before = Pt(3)
 
-    # CRISP WHITE HIGH-CONTRAST CARD FOR LINKS
+    # WHITE HIGH-CONTRAST CARD FOR LINKS
     link_container = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(2.35), Inches(11.5), Inches(2.7))
     link_container.fill.solid()
     link_container.fill.fore_color.rgb = c_white
@@ -143,7 +139,7 @@ def create_deck(filename):
     lcp0.font.bold = True
     lcp0.font.color.rgb = c_navy
 
-    # BUTTON 1: GITHUB REPO (HIGH CONTRAST BLUE BUTTON)
+    # BUTTON 1: GITHUB REPO
     btn_gh = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.3), Inches(2.95), Inches(10.7), Inches(0.85))
     btn_gh.fill.solid()
     btn_gh.fill.fore_color.rgb = c_btn_blue
@@ -174,7 +170,7 @@ def create_deck(filename):
     run_gh.font.color.rgb = c_white
     run_gh.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
 
-    # BUTTON 2: DIRECT LIVE WEB PORTAL (HIGH CONTRAST EMERALD GREEN BUTTON)
+    # BUTTON 2: LIVE APP
     btn_app = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.3), Inches(3.95), Inches(10.7), Inches(0.85))
     btn_app.fill.solid()
     btn_app.fill.fore_color.rgb = c_btn_green
@@ -205,7 +201,7 @@ def create_deck(filename):
     run_app.font.color.rgb = c_white
     run_app.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
 
-    # CRISP WHITE HIGH-CONTRAST CARD FOR TEAM MEMBERS
+    # TEAM CARD
     team_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.9), Inches(5.25), Inches(11.5), Inches(1.9))
     team_card.fill.solid()
     team_card.fill.fore_color.rgb = c_white
@@ -574,12 +570,12 @@ def create_deck(filename):
              ], c_btn_green)
 
     # ==============================================================
-    # SLIDE 8: SUMMARY & CONCLUSION (CLEAR WHITE CARD WITH BUTTONS)
+    # SLIDE 8: SUMMARY & CONCLUSION (CLEAN & NON-OVERLAPPING)
     # ==============================================================
     s8 = prs.slides.add_slide(blank_layout)
     add_header(s8, "Project Summary & Submission Details")
 
-    add_card(s8, Inches(0.8), Inches(1.6), Inches(5.6), Inches(5.2),
+    add_card(s8, Inches(0.8), Inches(1.5), Inches(5.6), Inches(5.5),
              "🌟 Key Technical Contributions", [
                  "1. Solved Problem Statement 26027 by integrating decentralized maintenance data (TMS, SMMS, TDMS) with train movement (COA).",
                  "2. Replaced manual guesswork with mathematical priority scoring and constraint satisfaction (CP-SAT).",
@@ -588,27 +584,27 @@ def create_deck(filename):
                  "5. Complete IEEE 830 documentation, test suites, and SE lab architecture diagrams (DFD 0/1, Use Case, Class, Swimlane, Sequence)."
              ], c_blue)
 
-    # Clean White Card on Slide 8
-    link_card_end = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.8), Inches(1.6), Inches(5.7), Inches(5.2))
+    # Clean White Card on Slide 8 (Spacious and cleanly positioned)
+    link_card_end = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.8), Inches(1.5), Inches(5.7), Inches(5.5))
     link_card_end.fill.solid()
     link_card_end.fill.fore_color.rgb = c_white
     link_card_end.line.color.rgb = c_gold
     link_card_end.line.width = Pt(1.5)
 
-    etf = link_card_end.text_frame
-    etf.word_wrap = True
-    etf.margin_left = Inches(0.3)
-    etf.margin_top = Inches(0.2)
+    # Title inside card using textbox for precision
+    title_box_s8 = s8.shapes.add_textbox(Inches(7.1), Inches(1.65), Inches(5.1), Inches(0.45))
+    t_s8 = title_box_s8.text_frame
+    t_s8.margin_left = Inches(0)
+    t_s8.margin_top = Inches(0)
+    p_t = t_s8.paragraphs[0]
+    p_t.text = "📦 Evaluation Resources & Verification:"
+    p_t.font.name = "Arial"
+    p_t.font.size = Pt(12)
+    p_t.font.bold = True
+    p_t.font.color.rgb = c_navy
 
-    ep0 = etf.paragraphs[0]
-    ep0.text = "📦 Evaluation Resources & Verification (Clickable Buttons):"
-    ep0.font.name = "Arial"
-    ep0.font.size = Pt(12)
-    ep0.font.bold = True
-    ep0.font.color.rgb = c_navy
-
-    # Slide 8 Button 1 (GitHub)
-    btn_end_gh = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.1), Inches(2.2), Inches(5.1), Inches(0.75))
+    # Button 1: GitHub
+    btn_end_gh = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.1), Inches(2.2), Inches(5.1), Inches(0.85))
     btn_end_gh.fill.solid()
     btn_end_gh.fill.fore_color.rgb = c_btn_blue
     btn_end_gh.line.color.rgb = RGBColor(30, 58, 138)
@@ -618,19 +614,24 @@ def create_deck(filename):
     tf_egh.margin_left = Inches(0.2)
     tf_egh.margin_top = Inches(0.12)
     p_e1 = tf_egh.paragraphs[0]
-    p_e1.text = "📂 Open GitHub Repository (Click Here)"
+    p_e1.text = "📂 Open GitHub Repository (Click Here):"
     p_e1.font.name = "Arial"
-    p_e1.font.size = Pt(11.5)
+    p_e1.font.size = Pt(11)
     p_e1.font.bold = True
-    p_e1.font.color.rgb = c_white
+    p_e1.font.color.rgb = c_gold
     p_e2 = tf_egh.add_paragraph()
-    p_e2.text = "https://github.com/Kr1sh8/ABPS-railway"
-    p_e2.font.size = Pt(9.5)
-    p_e2.font.color.rgb = c_gold
-    p_e2.font.underline = True
+    p_e2.space_before = Pt(2)
+    run_e2 = p_e2.add_run()
+    run_e2.text = "https://github.com/Kr1sh8/ABPS-railway"
+    run_e2.font.name = "Arial"
+    run_e2.font.size = Pt(11.5)
+    run_e2.font.bold = True
+    run_e2.font.underline = True
+    run_e2.font.color.rgb = c_white
+    run_e2.hyperlink.address = "https://github.com/Kr1sh8/ABPS-railway"
 
-    # Slide 8 Button 2 (Live App)
-    btn_end_app = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.1), Inches(3.05), Inches(5.1), Inches(0.75))
+    # Button 2: Web App
+    btn_end_app = s8.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(7.1), Inches(3.2), Inches(5.1), Inches(0.85))
     btn_end_app.fill.solid()
     btn_end_app.fill.fore_color.rgb = c_btn_green
     btn_end_app.line.color.rgb = RGBColor(20, 83, 45)
@@ -640,31 +641,46 @@ def create_deck(filename):
     tf_eapp.margin_left = Inches(0.2)
     tf_eapp.margin_top = Inches(0.12)
     p_ea1 = tf_eapp.paragraphs[0]
-    p_ea1.text = "🌐 Open Live Working Web App (Click Here)"
+    p_ea1.text = "🌐 Open Live Working Web App (Click Here):"
     p_ea1.font.name = "Arial"
-    p_ea1.font.size = Pt(11.5)
+    p_ea1.font.size = Pt(11)
     p_ea1.font.bold = True
-    p_ea1.font.color.rgb = c_white
+    p_ea1.font.color.rgb = RGBColor(254, 240, 138)
     p_ea2 = tf_eapp.add_paragraph()
-    p_ea2.text = "https://kr1sh8.github.io/ABPS-railway/"
-    p_ea2.font.size = Pt(9.5)
-    p_ea2.font.color.rgb = RGBColor(254, 240, 138)
-    p_ea2.font.underline = True
+    p_ea2.space_before = Pt(2)
+    run_ea2 = p_ea2.add_run()
+    run_ea2.text = "https://kr1sh8.github.io/ABPS-railway/"
+    run_ea2.font.name = "Arial"
+    run_ea2.font.size = Pt(11.5)
+    run_ea2.font.bold = True
+    run_ea2.font.underline = True
+    run_ea2.font.color.rgb = c_white
+    run_ea2.hyperlink.address = "https://kr1sh8.github.io/ABPS-railway/"
 
-    # Slide 8 Team Members Details
-    s8_team_box = s8.shapes.add_textbox(Inches(7.1), Inches(3.9), Inches(5.1), Inches(2.6))
+    # Team Members Text Box
+    s8_team_box = s8.shapes.add_textbox(Inches(7.1), Inches(4.2), Inches(5.1), Inches(2.6))
     sttf = s8_team_box.text_frame
     sttf.word_wrap = True
-    stp1 = sttf.paragraphs[0]
-    stp1.text = "👥 Team Members (CSE Department):"
+    sttf.margin_left = Inches(0)
+    sttf.margin_top = Inches(0.05)
+
+    stp0 = sttf.paragraphs[0]
+    stp0.text = "🔑 Evaluator Credentials: admin / admin123"
+    stp0.font.size = Pt(10)
+    stp0.font.bold = True
+    stp0.font.color.rgb = c_slate
+
+    stp1 = sttf.add_paragraph()
+    stp1.text = "👥 Project Development Team:"
     stp1.font.bold = True
     stp1.font.size = Pt(11)
     stp1.font.color.rgb = c_navy
+    stp1.space_before = Pt(6)
     
     members = [
-        "1. Krish Desai (Project Lead) - Backend & Optimizer",
-        "2. Krish Mittal - AI Priority Scoring & Benchmarks",
-        "3. Krishna Rathore - Frontend UI/UX & Quality Assurance"
+        "1. Krish Desai (Project Lead) — Backend & Optimizer",
+        "2. Krish Mittal — AI Priority Scoring & Benchmarks",
+        "3. Krishna Rathore — Frontend UI/UX & Quality Assurance"
     ]
     for m in members:
         pm = sttf.add_paragraph()
@@ -672,10 +688,10 @@ def create_deck(filename):
         pm.font.size = Pt(10)
         pm.font.color.rgb = c_dark
         pm.font.bold = True
-        pm.space_before = Pt(3)
+        pm.space_before = Pt(2.5)
 
     prs.save(filename)
-    print(f"✅ Generated high-contrast clickable presentation PPTX: {filename}")
+    print(f"✅ Generated fixed layout presentation PPTX: {filename}")
 
 if __name__ == "__main__":
     output_pptx = r"c:\Users\Hp\OneDrive\Desktop\railway system\ABPS_Project_Presentation.pptx"
